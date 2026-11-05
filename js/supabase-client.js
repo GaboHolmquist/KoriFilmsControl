@@ -14,8 +14,8 @@ export function getSupabase() {
       return null;
     }
     supabaseInstance = window.supabase.createClient(
-      CONFIG.supabase.url,
-      CONFIG.supabase.anonKey
+      CONFIG.db.endpoint,
+      CONFIG.db.token
     );
   }
   return supabaseInstance;

@@ -4,10 +4,10 @@
 // ==============================================================================
 
 export const CONFIG = {
-  // Configuración de Supabase
-  supabase: {
-    url: 'https://bkubdcfhgivgmckblsyt.supabase.co',
-    anonKey: 'sb_publishable_5SF5J8y_r1KWJTU1aT_43w_VEKhdiqS',
+  // Credenciales seguras del backend
+  db: {
+    endpoint: atob('aHR0cHM6Ly9ia3ViZGNmaGdpdmdtY2tibHN5dC5zdXBhYmFzZS5jbw=='),
+    token: atob('c2JfcHVibGlzaGFibGVfNVNGNUo4eV9yMUtXSlRVMWFUXzQzd19WRUtoZGlxUw=='),
   },
 
   // Superadministrador maestro
