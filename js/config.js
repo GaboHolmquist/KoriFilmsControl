@@ -33,6 +33,8 @@ export const CONFIG = {
     id: 'tencha',
     slug: 'tencha',
     nombre: 'Tencha Matchería',
+    dominio: 'tenchamatcheria.com',
+    urlCarta: 'https://tenchamatcheria.com/',
     tipo: 'Cafetería & Matcha Bar',
     ciudad: 'Santiago, Chile',
     activo: true,

@@ -169,6 +169,13 @@ function renderLocalesList(locales, tenchaStats) {
           </svg>
           Gestionar Usuarios
         </button>
+        ${
+          isTencha || local.urlCarta
+            ? `<a href="${local.urlCarta || 'https://tenchamatcheria.com/'}" target="_blank" class="btn btn-sm btn-outline" style="grid-column: 1 / -1; justify-content: center; font-size: 0.8rem; margin-top: 4px;">
+                Ver Carta Digital en Vivo (${local.dominio || 'tenchamatcheria.com'}) ↗
+              </a>`
+            : ''
+        }
       </div>
     `;
 
