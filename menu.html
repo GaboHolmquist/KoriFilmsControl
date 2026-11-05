@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Carta — Kori Films Control</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%2310b981'/><text x='50%' y='65%' font-size='55' font-weight='800' fill='white' text-anchor='middle'>K</text></svg>">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <!-- BARRA DE NAVEGACIÓN -->
+  <header class="navbar">
+    <div class="navbar-container">
+      <div class="brand-wrapper">
+        <a href="#" class="brand-wrapper" style="text-decoration: none;">
+          <div class="brand-logo-icon">K</div>
+          <div class="brand-text-col">
+            <span class="brand-name">KORI FILMS CONTROL</span>
+            <span class="brand-sub">Gestión de Carta Digital</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="navbar-actions">
+        <!-- Botón visible solo para Superadmin para regresar al Master Hub -->
+        <a id="back-to-hub-btn" href="hub.html" class="btn btn-sm btn-outline hidden">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          Master Hub
+        </a>
+
+        <div class="user-profile-widget">
+          <div class="user-avatar-circle">👤</div>
+          <span id="navbar-user-email" class="user-email-text">-</span>
+          <span id="navbar-user-badge" class="badge badge-client">CLIENTE</span>
+        </div>
+
+        <button id="navbar-logout-btn" class="btn btn-sm btn-outline" title="Cerrar Sesión">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          Salir
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="dashboard-container">
+    <!-- ENCABEZADO DE LA CARTA -->
+    <div class="page-header-row">
+      <div>
+        <h1 class="page-title">
+          <span id="menu-local-name">Tencha Matchería</span>
+        </h1>
+        <p class="page-subtitle">Activa o pausa productos en tiempo real, edita precios, tags gastronómicos y detalles del menú.</p>
+      </div>
+
+      <div class="header-action-group">
+        <button id="btn-new-product" class="btn btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Nuevo Producto
+        </button>
+      </div>
+    </div>
+
+    <!-- ESTADO DE CARGA -->
+    <div id="menu-loading" class="text-center" style="padding: 3rem 0;">
+      <div class="spinner" style="margin: 0 auto 1rem; width: 32px; height: 32px; border-width: 3px;"></div>
+      <p class="text-muted">Cargando categorías y productos de Supabase...</p>
+    </div>
+
+    <!-- CONTENIDO DE LA CARTA -->
+    <div id="menu-content" class="hidden">
+      <!-- RESUMEN RÁPIDO DE CARTA -->
+      <section class="kpi-grid" style="margin-bottom: 1.5rem;">
+        <div class="kpi-card" style="padding: 1rem 1.25rem;">
+          <div class="kpi-card-header">
+            <span class="kpi-title">Total Productos</span>
+            <div class="kpi-icon">📋</div>
+          </div>
+          <div id="stat-total-products" class="kpi-value">-</div>
+        </div>
+
+        <div class="kpi-card" style="padding: 1rem 1.25rem;">
+          <div class="kpi-card-header">
+            <span class="kpi-title">En Carta (Activos)</span>
+            <div class="kpi-icon">🟢</div>
+          </div>
+          <div id="stat-active-products" class="kpi-value text-success">-</div>
+        </div>
+
+        <div class="kpi-card" style="padding: 1rem 1.25rem;">
+          <div class="kpi-card-header">
+            <span class="kpi-title">Pausados (Agotados)</span>
+            <div class="kpi-icon">⏸️</div>
+          </div>
+          <div id="stat-paused-products" class="kpi-value text-warning">-</div>
+        </div>
+
+        <div class="kpi-card" style="padding: 1rem 1.25rem;">
+          <div class="kpi-card-header">
+            <span class="kpi-title">Categorías</span>
+            <div class="kpi-icon">🗂️</div>
+          </div>
+          <div id="stat-total-categories" class="kpi-value text-accent">-</div>
+        </div>
+      </section>
+
+      <!-- BARRA HORIZONTAL DE CATEGORÍAS -->
+      <div class="category-bar-wrapper">
+        <div id="category-pills-container" class="category-pills">
+          <!-- Renderizado dinámico vía menu.js -->
+        </div>
+      </div>
+
+      <!-- BARRA DE HERRAMIENTAS: BÚSQUEDA Y FILTROS -->
+      <div class="filters-toolbar">
+        <div class="search-box-wrapper">
+          <svg class="search-box-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input 
+            type="search" 
+            id="search-products-input" 
+            class="form-input search-input" 
+            placeholder="Buscar por nombre, japonés o ingrediente..."
+          >
+        </div>
+
+        <div class="filter-selects-group">
+          <select id="filter-status-select" class="form-select" style="min-width: 170px;">
+            <option value="all">Todos los estados</option>
+            <option value="available">Solo en carta (activos)</option>
+            <option value="paused">Solo pausados (agotados)</option>
+          </select>
+
+          <select id="filter-tag-select" class="form-select" style="min-width: 150px;">
+            <option value="all">Todos los tags</option>
+            <option value="vegano">🌱 Vegano</option>
+            <option value="frio">❄️ Frío</option>
+            <option value="caliente">🔥 Caliente</option>
+            <option value="sin-gluten">🌾 Sin Gluten</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- GRID DE PRODUCTOS -->
+      <div id="products-grid" class="products-grid">
+        <!-- Renderizado dinámico vía menu.js -->
+      </div>
+
+      <!-- ESTADO VACÍO -->
+      <div id="products-empty-state" class="hidden text-center" style="padding: 4rem 1rem;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">🍵</div>
+        <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">No se encontraron productos</h3>
+        <p class="text-muted">Prueba cambiando los filtros de categoría o búsqueda de texto.</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL: CREAR / EDITAR PRODUCTO -->
+  <div id="product-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3 id="product-modal-title" class="modal-title">Editar Producto</h3>
+        <button id="close-product-modal-btn" class="modal-close-btn" aria-label="Cerrar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <form id="product-form">
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="prod-nombre" class="form-label">Nombre del Producto *</label>
+              <input type="text" id="prod-nombre" class="form-input" placeholder="ej. Matcha Tónica Naranja" required>
+            </div>
+            <div class="form-group">
+              <label for="prod-jp" class="form-label">Nombre en Japonés / Kanji</label>
+              <input type="text" id="prod-jp" class="form-input" placeholder="ej. 抹茶トニック">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="prod-precio" class="form-label">Precio en CLP ($) *</label>
+              <input type="number" id="prod-precio" class="form-input" placeholder="ej. 5200" min="0" step="100" required>
+            </div>
+            <div class="form-group">
+              <label for="prod-categoria-select" class="form-label">Categoría *</label>
+              <select id="prod-categoria-select" class="form-select" required></select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="prod-sub" class="form-label">Subtítulo / Aclaración</label>
+              <input type="text" id="prod-sub" class="form-input" placeholder="ej. Leche entera o vegetal">
+            </div>
+            <div class="form-group">
+              <label for="prod-temperatura" class="form-label">Temperatura</label>
+              <select id="prod-temperatura" class="form-select">
+                <option value="ambos">Frío o Caliente (Ambos)</option>
+                <option value="frio">Solo Frío</option>
+                <option value="caliente">Solo Caliente</option>
+                <option value="no_aplica">No aplica (Comida / Yakigashi)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="prod-carpeta" class="form-label">Ruta de Foto / Video / Carpeta</label>
+            <input type="text" id="prod-carpeta" class="form-input" placeholder="ej. 02-matcha-tonica-naranja">
+          </div>
+
+          <div class="form-group">
+            <label for="prod-descripcion" class="form-label">Descripción e Ingredientes</label>
+            <textarea id="prod-descripcion" class="form-textarea" rows="2" placeholder="ej. Bebida refrescante con matcha ceremonial, agua tónica y jugo fresco de naranja."></textarea>
+          </div>
+
+          <!-- SELECTOR DE TAGS GASTRONÓMICOS -->
+          <div class="form-group">
+            <label class="form-label">Etiquetas Gastronómicas (Tags)</label>
+            <div class="tags-selector-grid">
+              <label class="tag-checkbox-label">
+                <input type="checkbox" class="tag-checkbox" value="vegano">
+                <span>🌱 Vegano</span>
+              </label>
+              <label class="tag-checkbox-label">
+                <input type="checkbox" class="tag-checkbox" value="sin-gluten">
+                <span>🌾 Sin Gluten</span>
+              </label>
+              <label class="tag-checkbox-label">
+                <input type="checkbox" class="tag-checkbox" value="frio">
+                <span>❄️ Frío</span>
+              </label>
+              <label class="tag-checkbox-label">
+                <input type="checkbox" class="tag-checkbox" value="caliente">
+                <span>🔥 Caliente</span>
+              </label>
+              <label class="tag-checkbox-label">
+                <input type="checkbox" class="tag-checkbox" value="sin-lactosa">
+                <span>🥛 Sin Lactosa</span>
+              </label>
+              <label class="tag-checkbox-label">
+                <input type="checkbox" class="tag-checkbox" value="destacado">
+                <span>⭐ Destacado</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- DISPONIBILIDAD -->
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="tag-checkbox-label" style="padding: 0.75rem;">
+              <input type="checkbox" id="prod-disponible-cb" checked>
+              <span style="font-size: 0.9rem; font-weight: 600;">Producto Activo (Visible en Carta)</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" id="save-product-btn" class="btn btn-primary">Guardar Producto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="js/menu.js"></script>
+</body>
+</html>
