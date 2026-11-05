@@ -2,281 +2,247 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gestión de Carta — Kori Films Control</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%2310b981'/><text x='50%' y='65%' font-size='55' font-weight='800' fill='white' text-anchor='middle'>K</text></svg>">
-  <link rel="stylesheet" href="css/styles.css">
-  <link rel="stylesheet" href="css/dashboard.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Gestión de Carta | Kori Films Control</title>
+  <meta name="theme-color" content="#09090b">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' http://localhost:* https:; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' blob: https://bkubdcfhgivgmckblsyt.supabase.co https:; connect-src 'self' blob: https://bkubdcfhgivgmckblsyt.supabase.co http://localhost:* https:; object-src 'none'; base-uri 'self'; form-action 'self';">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/tencha/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="assets/tencha/favicon.png">
+  <link rel="stylesheet" href="css/admin.css?v=2">
+  <script src="js/vendor/sdk.min.js"></script>
+  <style>
+    .btn-hub {
+      background: rgba(99, 102, 241, 0.18) !important;
+      color: #c7d2fe !important;
+      border: 1px solid rgba(99, 102, 241, 0.4) !important;
+      font-weight: 600 !important;
+    }
+    .btn-hub:hover {
+      background: rgba(99, 102, 241, 0.3) !important;
+      border-color: #818cf8 !important;
+    }
+    .kori-watermark {
+      font-size: 0.7rem;
+      letter-spacing: 0.05em;
+      color: rgba(255,255,255,0.35);
+      margin-left: 8px;
+    }
+  </style>
 </head>
 <body>
-
-  <!-- BARRA DE NAVEGACIÓN -->
-  <header class="navbar">
-    <div class="navbar-container">
-      <div class="brand-wrapper">
-        <a href="#" class="brand-wrapper" style="text-decoration: none;">
-          <div class="brand-logo-icon">K</div>
-          <div class="brand-text-col">
-            <span class="brand-name">KORI FILMS CONTROL</span>
-            <span class="brand-sub">Gestión de Carta Digital</span>
-          </div>
-        </a>
-      </div>
-
-      <div class="navbar-actions">
-        <!-- Botón visible solo para Superadmin para regresar al Master Hub -->
-        <a id="back-to-hub-btn" href="hub.html" class="btn btn-sm btn-outline hidden">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="15 18 9 12 15 6"></polyline>
-          </svg>
-          Master Hub
-        </a>
-
-        <div class="user-profile-widget">
-          <div class="user-avatar-circle">👤</div>
-          <span id="navbar-user-email" class="user-email-text">-</span>
-          <span id="navbar-user-badge" class="badge badge-client">CLIENTE</span>
-        </div>
-
-        <button id="navbar-logout-btn" class="btn btn-sm btn-outline" title="Cerrar Sesión">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-            <polyline points="16 17 21 12 16 7"></polyline>
-            <line x1="21" y1="12" x2="9" y2="12"></line>
-          </svg>
-          Salir
-        </button>
-      </div>
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <img src="logo.png" alt="Tencha Matcheria" id="topbarLogo" onerror="this.style.display='none'">
+      <span class="topbar-badge" id="topbarLocalBadge">TENCHA MATCHERIA</span>
+      <span class="kori-watermark">KORI CONTROL</span>
+    </div>
+    <div class="topbar-actions" id="topbarActions" style="display:none;">
+      <a href="hub.html" id="btnBackToHub" class="btn btn-sm btn-hub" style="display:none;">⎋ Master Hub</a>
+      <a href="https://tencha.cl" target="_blank" id="btnVerCarta" class="btn btn-sm">Ver Carta ↗</a>
+      <button class="btn btn-sm btn-danger" onclick="handleLogout()">Salir</button>
     </div>
   </header>
 
-  <main class="dashboard-container">
-    <!-- ENCABEZADO DE LA CARTA -->
-    <div class="page-header-row">
-      <div>
-        <h1 class="page-title">
-          <span id="menu-local-name">Tencha Matchería</span>
-        </h1>
-        <p class="page-subtitle">Activa o pausa productos en tiempo real, edita precios, tags gastronómicos y detalles del menú.</p>
-      </div>
+  <!-- Login View -->
+  <div class="login-container" id="loginView">
+    <div class="login-card">
+      <img src="logo.png" alt="Logo Local" id="loginCardLogo" onerror="this.style.display='none'">
+      <h1 class="login-title" id="loginTitle">Administración de Carta</h1>
+      <p class="login-sub" id="loginSub">Acceso restringido al personal autorizado</p>
+      <div id="loginError" class="alert-error" style="display:none;"></div>
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label class="form-label">Correo Electrónico</label>
+          <input type="email" id="loginEmail" class="form-input" placeholder="ej: contacto@tencha.cl" required autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contraseña</label>
+          <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-primary login-btn" id="loginSubmitBtn">Ingresar al Panel</button>
+      </form>
+    </div>
+  </div>
 
-      <div class="header-action-group">
-        <button id="btn-new-product" class="btn btn-primary">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-          Nuevo Producto
-        </button>
+  <!-- Dashboard View -->
+  <main class="dashboard" id="dashboardView" style="display:none;">
+    
+    <!-- Stats de Menú -->
+    <div class="stats-bar" style="margin-bottom: 12px;">
+      <div class="stat-card">
+        <span class="stat-val" id="statTotal">-</span>
+        <span class="stat-lbl">Productos en Menú</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-val" style="color:var(--success)" id="statActive">-</span>
+        <span class="stat-lbl">Activos en Vivo</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-val" style="color:var(--danger)" id="statInactive">-</span>
+        <span class="stat-lbl">Pausados / Apagados</span>
       </div>
     </div>
 
-    <!-- ESTADO DE CARGA -->
-    <div id="menu-loading" class="text-center" style="padding: 3rem 0;">
-      <div class="spinner" style="margin: 0 auto 1rem; width: 32px; height: 32px; border-width: 3px;"></div>
-      <p class="text-muted">Cargando categorías y productos de Supabase...</p>
-    </div>
-
-    <!-- CONTENIDO DE LA CARTA -->
-    <div id="menu-content" class="hidden">
-      <!-- RESUMEN RÁPIDO DE CARTA -->
-      <section class="kpi-grid" style="margin-bottom: 1.5rem;">
-        <div class="kpi-card" style="padding: 1rem 1.25rem;">
-          <div class="kpi-card-header">
-            <span class="kpi-title">Total Productos</span>
-            <div class="kpi-icon">📋</div>
-          </div>
-          <div id="stat-total-products" class="kpi-value">-</div>
-        </div>
-
-        <div class="kpi-card" style="padding: 1rem 1.25rem;">
-          <div class="kpi-card-header">
-            <span class="kpi-title">En Carta (Activos)</span>
-            <div class="kpi-icon">🟢</div>
-          </div>
-          <div id="stat-active-products" class="kpi-value text-success">-</div>
-        </div>
-
-        <div class="kpi-card" style="padding: 1rem 1.25rem;">
-          <div class="kpi-card-header">
-            <span class="kpi-title">Pausados (Agotados)</span>
-            <div class="kpi-icon">⏸️</div>
-          </div>
-          <div id="stat-paused-products" class="kpi-value text-warning">-</div>
-        </div>
-
-        <div class="kpi-card" style="padding: 1rem 1.25rem;">
-          <div class="kpi-card-header">
-            <span class="kpi-title">Categorías</span>
-            <div class="kpi-icon">🗂️</div>
-          </div>
-          <div id="stat-total-categories" class="kpi-value text-accent">-</div>
-        </div>
-      </section>
-
-      <!-- BARRA HORIZONTAL DE CATEGORÍAS -->
-      <div class="category-bar-wrapper">
-        <div id="category-pills-container" class="category-pills">
-          <!-- Renderizado dinámico vía menu.js -->
-        </div>
+    <!-- Analítica de Visitas -->
+    <div class="stats-bar" style="margin-bottom: 24px;">
+      <div class="stat-card">
+        <span class="stat-val" style="color:#059669;" id="statVisitorsUnique">-</span>
+        <span class="stat-lbl">👥 Clientes Únicos</span>
       </div>
-
-      <!-- BARRA DE HERRAMIENTAS: BÚSQUEDA Y FILTROS -->
-      <div class="filters-toolbar">
-        <div class="search-box-wrapper">
-          <svg class="search-box-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-          <input 
-            type="search" 
-            id="search-products-input" 
-            class="form-input search-input" 
-            placeholder="Buscar por nombre, japonés o ingrediente..."
-          >
-        </div>
-
-        <div class="filter-selects-group">
-          <select id="filter-status-select" class="form-select" style="min-width: 170px;">
-            <option value="all">Todos los estados</option>
-            <option value="available">Solo en carta (activos)</option>
-            <option value="paused">Solo pausados (agotados)</option>
-          </select>
-
-          <select id="filter-tag-select" class="form-select" style="min-width: 150px;">
-            <option value="all">Todos los tags</option>
-            <option value="vegano">🌱 Vegano</option>
-            <option value="frio">❄️ Frío</option>
-            <option value="caliente">🔥 Caliente</option>
-            <option value="sin-gluten">🌾 Sin Gluten</option>
-          </select>
-        </div>
+      <div class="stat-card">
+        <span class="stat-val" style="color:#2563eb;" id="statVisitsTotal">-</span>
+        <span class="stat-lbl">📖 Aperturas Totales</span>
       </div>
-
-      <!-- GRID DE PRODUCTOS -->
-      <div id="products-grid" class="products-grid">
-        <!-- Renderizado dinámico vía menu.js -->
+      <div class="stat-card">
+        <span class="stat-val" style="color:#7c3aed;" id="statVisitorsRecurrent">-</span>
+        <span class="stat-lbl">🔁 Clientes Recurrentes</span>
       </div>
-
-      <!-- ESTADO VACÍO -->
-      <div id="products-empty-state" class="hidden text-center" style="padding: 4rem 1rem;">
-        <div style="font-size: 3rem; margin-bottom: 1rem;">🍵</div>
-        <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">No se encontraron productos</h3>
-        <p class="text-muted">Prueba cambiando los filtros de categoría o búsqueda de texto.</p>
+      <div class="stat-card">
+        <span class="stat-val" style="color:#d97706;" id="statRecurrenceRate">-</span>
+        <span class="stat-lbl">📈 Tasa de Reincidencia</span>
       </div>
     </div>
+
+    <!-- Toolbar -->
+    <div class="dashboard-toolbar">
+      <div class="search-box">
+        <span>🔍</span>
+        <input type="text" id="searchInput" placeholder="Buscar producto por nombre, japonés o subtítulo..." oninput="handleSearch(this.value)">
+      </div>
+      <button class="btn btn-primary" id="btnNewProduct" style="display:none;" onclick="openNewProductModal()">+ Añadir Producto</button>
+    </div>
+
+    <!-- Category Chips Quick Jump -->
+    <div class="chips-bar" id="categoryChips"></div>
+
+    <!-- Dynamic Sections Container -->
+    <div id="sectionsContainer"></div>
+
   </main>
 
-  <!-- MODAL: CREAR / EDITAR PRODUCTO -->
-  <div id="product-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
-    <div class="modal-window">
-      <div class="modal-header">
-        <h3 id="product-modal-title" class="modal-title">Editar Producto</h3>
-        <button id="close-product-modal-btn" class="modal-close-btn" aria-label="Cerrar">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 6L6 18M6 6l12 12"></path>
-          </svg>
-        </button>
+  <!-- Edit / New Product Modal -->
+  <div class="modal-backdrop" id="productModal">
+    <div class="modal">
+      <div class="modal-head">
+        <h2 class="modal-title" id="modalTitle">Producto</h2>
+        <button class="modal-close" onclick="closeProductModal()">✕</button>
       </div>
-
-      <form id="product-form">
-        <div class="modal-body">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="prod-nombre" class="form-label">Nombre del Producto *</label>
-              <input type="text" id="prod-nombre" class="form-input" placeholder="ej. Matcha Tónica Naranja" required>
-            </div>
-            <div class="form-group">
-              <label for="prod-jp" class="form-label">Nombre en Japonés / Kanji</label>
-              <input type="text" id="prod-jp" class="form-input" placeholder="ej. 抹茶トニック">
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="prod-precio" class="form-label">Precio en CLP ($) *</label>
-              <input type="number" id="prod-precio" class="form-input" placeholder="ej. 5200" min="0" step="100" required>
-            </div>
-            <div class="form-group">
-              <label for="prod-categoria-select" class="form-label">Categoría *</label>
-              <select id="prod-categoria-select" class="form-select" required></select>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="prod-sub" class="form-label">Subtítulo / Aclaración</label>
-              <input type="text" id="prod-sub" class="form-input" placeholder="ej. Leche entera o vegetal">
-            </div>
-            <div class="form-group">
-              <label for="prod-temperatura" class="form-label">Temperatura</label>
-              <select id="prod-temperatura" class="form-select">
-                <option value="ambos">Frío o Caliente (Ambos)</option>
-                <option value="frio">Solo Frío</option>
-                <option value="caliente">Solo Caliente</option>
-                <option value="no_aplica">No aplica (Comida / Yakigashi)</option>
-              </select>
-            </div>
-          </div>
-
+      <form id="productForm" novalidate onsubmit="saveProduct(event)">
+        <input type="hidden" id="editId">
+        <input type="hidden" id="editIsRec">
+        <div class="form-group" id="catSelectGroup">
+          <label class="form-label">Categoría</label>
+          <select id="prodCat" class="form-select"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nombre del Producto</label>
+          <input type="text" id="prodNombre" class="form-input" placeholder="Ej: Koicha" oninput="autoFillCarpeta(this.value)">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
           <div class="form-group">
-            <label for="prod-carpeta" class="form-label">Ruta de Foto / Video / Carpeta</label>
-            <input type="text" id="prod-carpeta" class="form-input" placeholder="ej. 02-matcha-tonica-naranja">
+            <label class="form-label">Subtítulo (opcional)</label>
+            <input type="text" id="prodSub" class="form-input" placeholder="Ej: Matcha y agua">
           </div>
-
           <div class="form-group">
-            <label for="prod-descripcion" class="form-label">Descripción e Ingredientes</label>
-            <textarea id="prod-descripcion" class="form-textarea" rows="2" placeholder="ej. Bebida refrescante con matcha ceremonial, agua tónica y jugo fresco de naranja."></textarea>
+            <label class="form-label">Japonés / Kanji (opcional)</label>
+            <input type="text" id="prodJp" class="form-input jp" placeholder="Ej: 濃茶">
           </div>
-
-          <!-- SELECTOR DE TAGS GASTRONÓMICOS -->
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
           <div class="form-group">
-            <label class="form-label">Etiquetas Gastronómicas (Tags)</label>
-            <div class="tags-selector-grid">
-              <label class="tag-checkbox-label">
-                <input type="checkbox" class="tag-checkbox" value="vegano">
-                <span>🌱 Vegano</span>
-              </label>
-              <label class="tag-checkbox-label">
-                <input type="checkbox" class="tag-checkbox" value="sin-gluten">
-                <span>🌾 Sin Gluten</span>
-              </label>
-              <label class="tag-checkbox-label">
-                <input type="checkbox" class="tag-checkbox" value="frio">
-                <span>❄️ Frío</span>
-              </label>
-              <label class="tag-checkbox-label">
-                <input type="checkbox" class="tag-checkbox" value="caliente">
-                <span>🔥 Caliente</span>
-              </label>
-              <label class="tag-checkbox-label">
-                <input type="checkbox" class="tag-checkbox" value="sin-lactosa">
-                <span>🥛 Sin Lactosa</span>
-              </label>
-              <label class="tag-checkbox-label">
-                <input type="checkbox" class="tag-checkbox" value="destacado">
-                <span>⭐ Destacado</span>
-              </label>
+            <label class="form-label">Precio (CLP)</label>
+            <input type="number" id="prodPrecio" class="form-input" placeholder="4500">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Temperatura</label>
+            <select id="prodTemp" class="form-select">
+              <option value="">Ninguna</option>
+              <option value="caliente">🔥 Caliente</option>
+              <option value="frio">❄️ Frío</option>
+              <option value="ambos">❄️🔥 Ambos</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group" id="folderGroup">
+          <label class="form-label">Identificador / Carpeta del Producto</label>
+          <input type="text" id="prodCarpeta" class="form-input" placeholder="01-nombre-carpeta">
+        </div>
+        <div class="media-upload-box" id="mediaUploadGroup" style="display:none;">
+          <label class="form-label" style="color:var(--matcha);margin-bottom:8px;">📸 Foto y Video (Optimización Automática)</label>
+          <div class="media-upload-grid">
+            <div class="media-drop">
+              <span style="font-size:0.78rem;font-weight:600;">Foto (4:5 WebP)</span>
+              <input type="file" id="prodFotoFile" accept="image/*" onchange="handleFotoSelect(this)">
+              <span class="media-status" id="fotoStatusText">Se comprime automáticamente a WebP ultraligero</span>
+            </div>
+            <div class="media-drop">
+              <span style="font-size:0.78rem;font-weight:600;">Video (MP4 720p)</span>
+              <input type="file" id="prodVideoFile" accept="video/mp4,video/quicktime,video/webm,video/*" onchange="handleVideoSelect(this)">
+              <span class="media-status" id="videoStatusText">Se convierte igual al Kabocha Latte (H.264 sin audio)</span>
             </div>
           </div>
-
-          <!-- DISPONIBILIDAD -->
-          <div class="form-group" style="margin-bottom: 0;">
-            <label class="tag-checkbox-label" style="padding: 0.75rem;">
-              <input type="checkbox" id="prod-disponible-cb" checked>
-              <span style="font-size: 0.9rem; font-weight: 600;">Producto Activo (Visible en Carta)</span>
+          <div class="progress-wrap" id="mediaProgressWrap">
+            <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text);">
+              <span id="mediaProgressLabel">Procesando multimedia...</span>
+              <span id="mediaProgressPct">0%</span>
+            </div>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" id="mediaProgressFill"></div>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descripción</label>
+          <textarea id="prodDesc" class="form-textarea" placeholder="Descripción e ingredientes del producto..."></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom:14px;">
+          <label class="form-label">Preferencias Dietarias (tags gastronómicos)</label>
+          <div style="display:flex;gap:10px;margin-top:6px;flex-wrap:wrap;">
+            <label class="checkbox-pill" id="lblVegano">
+              <input type="checkbox" id="prodVegano" onchange="this.parentElement.classList.toggle('active', this.checked)">
+              🌱 Vegano
+            </label>
+            <label class="checkbox-pill" id="lblSinGluten">
+              <input type="checkbox" id="prodSinGluten" onchange="this.parentElement.classList.toggle('active', this.checked)">
+              🌾 Sin gluten
             </label>
           </div>
         </div>
-
-        <div class="modal-footer">
-          <button type="submit" id="save-product-btn" class="btn btn-primary">Guardar Producto</button>
+        <div class="switch-wrap" style="margin-bottom:8px;">
+          <span class="switch-label">Disponible en carta</span>
+          <label class="switch">
+            <input type="checkbox" id="prodDisp" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="switch-wrap" style="margin-bottom:20px;">
+          <span class="switch-label" id="lblModalAgotado">Producto agotado</span>
+          <label class="switch switch-warn">
+            <input type="checkbox" id="prodAgotado">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <button type="button" class="btn btn-danger btn-sm" id="btnDeleteProd" onclick="deleteCurrentProduct()" style="display:none;">Eliminar</button>
+          <div style="display:flex;gap:8px;margin-left:auto;">
+            <button type="button" class="btn" onclick="closeProductModal()">Cancelar</button>
+            <button type="button" class="btn btn-primary" id="btnSaveProd" onclick="saveProduct(event)">Guardar</button>
+          </div>
         </div>
       </form>
     </div>
   </div>
 
-  <script type="module" src="js/menu.js"></script>
+  <!-- Toast -->
+  <div class="toast" id="toast">
+    <span id="toastIcon">✓</span>
+    <span id="toastMsg">Guardado con éxito</span>
+  </div>
+
+  <script src="js/admin.js?v=4"></script>
 </body>
 </html>
