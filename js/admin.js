@@ -8,7 +8,7 @@
 
   // Credenciales ofuscadas para seguridad
   const _API_URL = atob('aHR0cHM6Ly9ia3ViZGNmaGdpdmdtY2tibHN5dC5zdXBhYmFzZS5jbw==');
-  const _API_KEY = atob('c2JfcHVibGlzaGFibGVfNVNGNUo4eV9yMUtXSlRVMWFUXzQzd19WRUtocWRpcVM=');
+  const _API_KEY = atob('c2JfcHVibGlzaGFibGVfNVNGNUo4eV9yMUtXSlRVMWFUXzQzd19WRUtoZGlxUw==');
 
   const dbClient = (window.supabase || window._dbSdk).createClient(_API_URL, _API_KEY);
 
