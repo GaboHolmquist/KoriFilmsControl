@@ -506,10 +506,11 @@
       imgSrc = (rawFolder.endsWith('/') ? rawFolder : rawFolder + '/') + 'foto.webp';
     } else {
       const safeFolder = rawFolder.replace(/[^a-zA-Z0-9_\-\/]/g, '');
+      const remoteDomain = 'https://tenchamatcheria.com';
       if (isRec || safeFolder.startsWith('productos/')) {
-        imgSrc = `${safeFolder.endsWith('/') ? safeFolder : safeFolder + '/'}foto.webp`;
+        imgSrc = `${remoteDomain}/${safeFolder.replace(/^\/+/, '')}${safeFolder.endsWith('/') ? '' : '/'}foto.webp`;
       } else {
-        imgSrc = `productos/${safeCatFolder}/${safeFolder}/foto.webp`;
+        imgSrc = `${remoteDomain}/productos/${safeCatFolder}/${safeFolder}/foto.webp`;
       }
     }
 
