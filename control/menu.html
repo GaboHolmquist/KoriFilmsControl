@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Gestión de Carta | Kori Films Control</title>
+  <meta name="theme-color" content="#09090b">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' http://localhost:* https:; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' blob: https:; connect-src 'self' blob: http://localhost:* https:; object-src 'none'; base-uri 'self'; form-action 'self';">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="../favicon.png">
+  <link rel="apple-touch-icon" href="../favicon.png">
+  <link rel="stylesheet" href="../css/admin.css?v=2">
+  <script src="../js/vendor/sdk.min.js"></script>
+  <style>
+    .btn-hub {
+      background: rgba(99, 102, 241, 0.18) !important;
+      color: #c7d2fe !important;
+      border: 1px solid rgba(99, 102, 241, 0.4) !important;
+      font-weight: 600 !important;
+    }
+    .btn-hub:hover {
+      background: rgba(99, 102, 241, 0.3) !important;
+      border-color: #818cf8 !important;
+    }
+  </style>
+</head>
+<body>
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <img src="../assets/kori-mark.png" alt="Kori Films" style="height: 28px; width: auto; display: block;">
+      <span class="topbar-badge" id="topbarLocalBadge">TENCHA MATCHERIA</span>
+    </div>
+    <div class="topbar-actions" id="topbarActions" style="display:none;">
+      <a href="hub.html" id="btnBackToHub" class="btn btn-sm btn-hub" style="display:none;">⎋ Master Hub</a>
+      <a href="https://tenchamatcheria.com/" target="_blank" id="btnVerCarta" class="btn btn-sm">Ver Carta ↗</a>
+      <button class="btn btn-sm btn-danger" onclick="handleLogout()">Salir</button>
+    </div>
+  </header>
+
+  <!-- Login View -->
+  <div class="login-container" id="loginView">
+    <div class="login-card">
+      <img src="logo.png" alt="Logo Local" id="loginCardLogo" onerror="this.style.display='none'">
+      <h1 class="login-title" id="loginTitle">Administración de Carta</h1>
+      <p class="login-sub" id="loginSub">Acceso restringido al personal autorizado</p>
+      <div id="loginError" class="alert-error" style="display:none;"></div>
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label class="form-label">Correo Electrónico</label>
+          <input type="email" id="loginEmail" class="form-input" placeholder="ej: contacto@tencha.cl" required autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contraseña</label>
+          <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-primary login-btn" id="loginSubmitBtn">Ingresar al Panel</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Dashboard View -->
+  <main class="dashboard" id="dashboardView" style="display:none;">
+    
+    <!-- Stats de Menú -->
+    <div class="stats-bar" style="margin-bottom: 12px;">
+      <div class="stat-card">
+        <span class="stat-val" id="statTotal">-</span>
+        <span class="stat-lbl">Productos en Menú</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-val" style="color:var(--success)" id="statActive">-</span>
+        <span class="stat-lbl">Activos en Vivo</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-val" style="color:var(--danger)" id="statInactive">-</span>
+        <span class="stat-lbl">Pausados / Apagados</span>
+      </div>
+    </div>
+
+    <!-- Analítica de Visitas -->
+    <div class="stats-bar" style="margin-bottom: 24px;">
+      <div class="stat-card">
+        <span class="stat-val" style="color:#059669;" id="statVisitorsUnique">-</span>
+        <span class="stat-lbl">👥 Clientes Únicos</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-val" style="color:#2563eb;" id="statVisitsTotal">-</span>
+        <span class="stat-lbl">📖 Aperturas Totales</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-val" style="color:#7c3aed;" id="statVisitorsRecurrent">-</span>
+        <span class="stat-lbl">🔁 Clientes Recurrentes</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-val" style="color:#d97706;" id="statRecurrenceRate">-</span>
+        <span class="stat-lbl">📈 Tasa de Reincidencia</span>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="dashboard-toolbar">
+      <div class="search-box">
+        <span>🔍</span>
+        <input type="text" id="searchInput" placeholder="Buscar producto por nombre, japonés o subtítulo..." oninput="handleSearch(this.value)">
+      </div>
+      <button class="btn btn-primary" id="btnNewProduct" style="display:none;" onclick="openNewProductModal()">+ Añadir Producto</button>
+    </div>
+
+    <!-- Category Chips Quick Jump -->
+    <div class="chips-bar" id="categoryChips"></div>
+
+    <!-- Dynamic Sections Container -->
+    <div id="sectionsContainer"></div>
+
+  </main>
+
+  <!-- Edit / New Product Modal -->
+  <div class="modal-backdrop" id="productModal">
+    <div class="modal">
+      <div class="modal-head">
+        <h2 class="modal-title" id="modalTitle">Producto</h2>
+        <button class="modal-close" onclick="closeProductModal()">✕</button>
+      </div>
+      <form id="productForm" novalidate onsubmit="saveProduct(event)">
+        <input type="hidden" id="editId">
+        <input type="hidden" id="editIsRec">
+        <div class="form-group" id="catSelectGroup">
+          <label class="form-label">Categoría</label>
+          <select id="prodCat" class="form-select"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nombre del Producto</label>
+          <input type="text" id="prodNombre" class="form-input" placeholder="Ej: Koicha" oninput="autoFillCarpeta(this.value)">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="form-group">
+            <label class="form-label">Subtítulo (opcional)</label>
+            <input type="text" id="prodSub" class="form-input" placeholder="Ej: Matcha y agua">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Japonés / Kanji (opcional)</label>
+            <input type="text" id="prodJp" class="form-input jp" placeholder="Ej: 濃茶">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="form-group">
+            <label class="form-label">Precio (CLP)</label>
+            <input type="number" id="prodPrecio" class="form-input" placeholder="4500">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Temperatura</label>
+            <select id="prodTemp" class="form-select">
+              <option value="">Ninguna</option>
+              <option value="caliente">🔥 Caliente</option>
+              <option value="frio">❄️ Frío</option>
+              <option value="ambos">❄️🔥 Ambos</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group" id="folderGroup">
+          <label class="form-label">Identificador / Carpeta del Producto</label>
+          <input type="text" id="prodCarpeta" class="form-input" placeholder="01-nombre-carpeta">
+        </div>
+        <div class="media-upload-box" id="mediaUploadGroup" style="display:none;">
+          <label class="form-label" style="color:var(--matcha);margin-bottom:8px;">📸 Foto y Video (Optimización Automática)</label>
+          <div class="media-upload-grid">
+            <div class="media-drop">
+              <span style="font-size:0.78rem;font-weight:600;">Foto (4:5 WebP)</span>
+              <input type="file" id="prodFotoFile" accept="image/*" onchange="handleFotoSelect(this)">
+              <span class="media-status" id="fotoStatusText">Se comprime automáticamente a WebP ultraligero</span>
+            </div>
+            <div class="media-drop">
+              <span style="font-size:0.78rem;font-weight:600;">Video (MP4 720p)</span>
+              <input type="file" id="prodVideoFile" accept="video/mp4,video/quicktime,video/webm,video/*" onchange="handleVideoSelect(this)">
+              <span class="media-status" id="videoStatusText">Se convierte igual al Kabocha Latte (H.264 sin audio)</span>
+            </div>
+          </div>
+          <div class="progress-wrap" id="mediaProgressWrap">
+            <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text);">
+              <span id="mediaProgressLabel">Procesando multimedia...</span>
+              <span id="mediaProgressPct">0%</span>
+            </div>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" id="mediaProgressFill"></div>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descripción</label>
+          <textarea id="prodDesc" class="form-textarea" placeholder="Descripción e ingredientes del producto..."></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom:14px;">
+          <label class="form-label">Preferencias Dietarias (tags gastronómicos)</label>
+          <div style="display:flex;gap:10px;margin-top:6px;flex-wrap:wrap;">
+            <label class="checkbox-pill" id="lblVegano">
+              <input type="checkbox" id="prodVegano" onchange="this.parentElement.classList.toggle('active', this.checked)">
+              🌱 Vegano
+            </label>
+            <label class="checkbox-pill" id="lblSinGluten">
+              <input type="checkbox" id="prodSinGluten" onchange="this.parentElement.classList.toggle('active', this.checked)">
+              🌾 Sin gluten
+            </label>
+          </div>
+        </div>
+        <div class="switch-wrap" style="margin-bottom:8px;">
+          <span class="switch-label">Disponible en carta</span>
+          <label class="switch">
+            <input type="checkbox" id="prodDisp" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="switch-wrap" style="margin-bottom:20px;">
+          <span class="switch-label" id="lblModalAgotado">Producto agotado</span>
+          <label class="switch switch-warn">
+            <input type="checkbox" id="prodAgotado">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <button type="button" class="btn btn-danger btn-sm" id="btnDeleteProd" onclick="deleteCurrentProduct()" style="display:none;">Eliminar</button>
+          <div style="display:flex;gap:8px;margin-left:auto;">
+            <button type="button" class="btn" onclick="closeProductModal()">Cancelar</button>
+            <button type="button" class="btn btn-primary" id="btnSaveProd" onclick="saveProduct(event)">Guardar</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">
+    <span id="toastIcon">✓</span>
+    <span id="toastMsg">Guardado con éxito</span>
+  </div>
+
+  <script src="../js/admin.js?v=6"></script>
+</body>
+</html>

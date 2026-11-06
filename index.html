@@ -3,92 +3,355 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kori Films Control — Acceso Centralizado</title>
-  <meta name="description" content="Panel maestro y administración de cartas digitales gastronómicas para restaurantes y cafeterías.">
+  <title>Kori Films — Agencia Creativa & Cartas Digitales Gastronómicas</title>
+  <meta name="description" content="Agencia creativa audiovisual y plataforma de cartas digitales para restaurantes y cafeterías en Chile.">
+  <meta name="theme-color" content="#090a0f">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="512x512" href="favicon.png">
   <link rel="apple-touch-icon" href="favicon.png">
   <link rel="stylesheet" href="css/styles.css">
-  <link rel="stylesheet" href="css/auth.css">
-  <script src="js/vendor/sdk.min.js"></script>
+  <style>
+    :root {
+      --bg-dark: #07080b;
+      --card-bg: rgba(18, 21, 30, 0.7);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --accent: #10b981;
+      --accent-glow: rgba(16, 185, 129, 0.25);
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: #f1f5f9;
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Ambient lighting */
+    .ambient-glow-1 {
+      position: absolute;
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 700px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, rgba(99, 102, 241, 0.08) 50%, transparent 75%);
+      filter: blur(90px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .ambient-glow-2 {
+      position: absolute;
+      bottom: 5%;
+      right: 10%;
+      width: 500px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, transparent 70%);
+      filter: blur(100px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Navbar */
+    .landing-nav {
+      position: relative;
+      z-index: 10;
+      padding: 1.5rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .landing-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .landing-brand img {
+      height: 38px;
+      width: auto;
+      display: block;
+    }
+
+    .nav-btn-control {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: #6ee7b7;
+      padding: 0.55rem 1.15rem;
+      border-radius: 99px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .nav-btn-control:hover {
+      background: var(--accent);
+      color: #090a0f;
+      box-shadow: 0 0 20px var(--accent-glow);
+      transform: translateY(-1px);
+    }
+
+    /* Hero Section */
+    .hero-section {
+      position: relative;
+      z-index: 1;
+      max-width: 1000px;
+      margin: 3.5rem auto 2rem;
+      padding: 0 1.5rem;
+      text-align: center;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0.4rem 1rem;
+      border-radius: 99px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #94a3b8;
+      margin-bottom: 1.75rem;
+    }
+
+    .hero-badge span {
+      color: var(--accent);
+    }
+
+    .hero-logo-img {
+      max-width: 460px;
+      width: 85%;
+      height: auto;
+      margin: 0 auto 1.5rem;
+      display: block;
+      filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.8));
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      font-weight: 400;
+      color: #94a3b8;
+      max-width: 650px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.6;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .cta-main {
+      background: linear-gradient(135deg, var(--accent) 0%, #059669 100%);
+      color: #04100c;
+      padding: 0.95rem 1.85rem;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      text-decoration: none;
+      box-shadow: 0 4px 25px var(--accent-glow);
+      transition: all 0.25s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cta-main:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
+      filter: brightness(1.08);
+    }
+
+    .cta-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: #f1f5f9;
+      padding: 0.95rem 1.5rem;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cta-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Features Grid */
+    .features-section {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 4.5rem auto 3rem;
+      padding: 0 1.5rem;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .feature-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 2rem;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: all 0.25s ease;
+    }
+
+    .feature-card:hover {
+      border-color: rgba(255, 255, 255, 0.18);
+      transform: translateY(-3px);
+    }
+
+    .feature-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      display: inline-block;
+    }
+
+    .feature-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: #fff;
+    }
+
+    .feature-desc {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      line-height: 1.55;
+    }
+
+    /* Footer */
+    .landing-footer {
+      margin-top: auto;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 2rem 1.5rem;
+      text-align: center;
+      font-size: 0.82rem;
+      color: #64748b;
+      position: relative;
+      z-index: 1;
+    }
+
+    .landing-footer a {
+      color: #94a3b8;
+      text-decoration: none;
+    }
+
+    .landing-footer a:hover {
+      color: var(--accent);
+    }
+  </style>
 </head>
-<body class="auth-page">
+<body>
 
-  <div class="auth-bg-ambient"></div>
+  <div class="ambient-glow-1"></div>
+  <div class="ambient-glow-2"></div>
 
-  <main class="auth-card">
-    <div class="auth-brand-header">
-      <img src="assets/logo-kori.png" alt="Kori Films" style="height: 48px; width: auto; margin-bottom: 1rem; display: inline-block; filter: drop-shadow(0 2px 10px rgba(0,0,0,0.5));">
-      <h1 class="auth-title">KORI FILMS CONTROL</h1>
-      <p class="auth-subtitle">Panel Maestro & Administración de Cartas Digitales</p>
+  <!-- Header / Nav -->
+  <header class="landing-nav">
+    <a href="/" class="landing-brand">
+      <img src="assets/kori-mark.png" alt="Kori Films">
+    </a>
+    <a href="control/" class="nav-btn-control">
+      <span>Kori Control</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M5 12h14M12 5l7 7-7 7"></path>
+      </svg>
+    </a>
+  </header>
+
+  <!-- Hero -->
+  <main class="hero-section">
+    <div class="hero-badge">
+      <span>●</span> Producción Visual & Cartas Gastronómicas
     </div>
 
-    <!-- BANNER DE BLOQUEO ANTI-FUERZA BRUTA (1 MINUTO AL 4TO INTENTO) -->
-    <div id="lockout-alert" class="lockout-banner hidden" role="alert" aria-live="assertive">
-      <div class="lockout-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+    <img src="assets/logo-kori.png" alt="Kori Films" class="hero-logo-img">
+
+    <p class="hero-subtitle">
+      Creamos experiencias visuales de alto impacto y plataformas de cartas digitales interactivas para restaurantes y cafeterías de especialidad.
+    </p>
+
+    <div class="hero-actions">
+      <a href="control/" class="cta-main">
+        <span>Acceso a Cartas Digitales (Kori Control)</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M5 12h14M12 5l7 7-7 7"></path>
         </svg>
-      </div>
-      <div class="lockout-content">
-        <div class="lockout-title">Acceso Bloqueado por Seguridad</div>
-        <p class="lockout-desc">Has superado el límite de 4 intentos fallidos. Por protección de la plataforma, el acceso está suspendido temporalmente.</p>
-        <div class="lockout-timer-pill">
-          <span>Tiempo restante:</span>
-          <strong id="lockout-timer">60s</strong>
-        </div>
-      </div>
+      </a>
+      <a href="https://tenchamatcheria.com" target="_blank" rel="noopener" class="cta-secondary">
+        <span>Ver Carta de Tencha</span>
+        <span>↗</span>
+      </a>
     </div>
-
-    <!-- Mensajes dinámicos de error / éxito -->
-    <div id="login-message" class="auth-message hidden"></div>
-
-    <!-- Formulario de Login -->
-    <form id="login-form" novalidate>
-      <div class="form-group">
-        <label for="email-input" class="form-label">Correo Electrónico</label>
-        <input 
-          type="email" 
-          id="email-input" 
-          class="form-input" 
-          placeholder="ej. admin@korifilms.cl" 
-          autocomplete="email" 
-          required
-        >
-      </div>
-
-      <div class="form-group">
-        <label for="password-input" class="form-label">Contraseña</label>
-        <div class="password-input-wrapper">
-          <input 
-            type="password" 
-            id="password-input" 
-            class="form-input" 
-            placeholder="••••••••••••" 
-            autocomplete="current-password" 
-            required
-          >
-          <button type="button" id="toggle-password-btn" class="toggle-password-btn" aria-label="Mostrar u ocultar contraseña">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-              <circle cx="12" cy="12" r="3"></circle>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <button type="submit" id="submit-btn" class="btn btn-primary btn-block">
-        <span id="submit-spinner" class="spinner hidden"></span>
-        <span id="submit-text">Ingresar al Panel</span>
-      </button>
-    </form>
-
-    <footer class="auth-footer">
-      <p>Kori Films Control • <code>control.korifilms.cl</code></p>
-    </footer>
   </main>
 
-  <script type="module" src="js/auth.js"></script>
+  <!-- Soluciones -->
+  <section class="features-section">
+    <div class="features-grid">
+      <div class="feature-card">
+        <span class="feature-icon">🍵</span>
+        <h3 class="feature-title">Cartas Digitales Interactivas</h3>
+        <p class="feature-desc">
+          Menús QR rápidos, visualmente cinematográficos, con video en ultra alta definición y soporte para etiquetas dietarias y alérgenos en tiempo real.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">⚡</span>
+        <h3 class="feature-title">Kori Control en Vivo</h3>
+        <p class="feature-desc">
+          Panel de administración centralizado: pausa productos agotados en 1 segundo durante el servicio, modifica precios y gestiona el carrusel de recomendados.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">🎬</span>
+        <h3 class="feature-title">Producción Audiovisual</h3>
+        <p class="feature-desc">
+          Captura cinematográfica especializada en gastronomía y coctelería. Optimización automática a WebP y MP4 H.264 para cargas ultra veloces.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="landing-footer">
+    <p>© 2026 Kori Films SpA • Santiago, Chile • <a href="control/">Panel de Control</a></p>
+  </footer>
+
 </body>
 </html>
