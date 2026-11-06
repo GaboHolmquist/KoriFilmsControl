@@ -1,6 +1,9 @@
 [build]
   publish = "."
 
+[build.environment]
+  NETLIFY_DRAWER = "false"
+
 [[headers]]
   for = "/*"
   [headers.values]
