@@ -498,20 +498,35 @@
   }
 
   function renderProductCard(item, isRec = false, catCarpeta = '') {
-    let imgSrc = 'logo.png';
+    let imgSrc = '../assets/logo-kori.png';
+    let fallbackSrc = '../assets/logo-kori.png';
     const rawFolder = String(item.carpeta || '').replace(/#(no)?video$/, '').trim();
     const safeCatFolder = String(catCarpeta || '').replace(/[^a-zA-Z0-9_\-\/]/g, '');
+    const remoteDomain = 'https://tenchamatcheria.com';
 
     if (/^https?:\/\//i.test(rawFolder)) {
-      imgSrc = (rawFolder.endsWith('/') ? rawFolder : rawFolder + '/') + 'foto.webp';
+      const cleanRemote = rawFolder.endsWith('/') ? rawFolder : rawFolder + '/';
+      imgSrc = cleanRemote + 'foto.webp';
+
+      // Fallback a Tencha si en Supabase solo se subió el video (.mp4) pero no la foto (.webp)
+      const matchProd = cleanRemote.match(/productos\/(.+)$/i);
+      if (matchProd && matchProd[1]) {
+        fallbackSrc = `${remoteDomain}/productos/${matchProd[1].replace(/^\/+/, '')}foto.webp`;
+      } else {
+        const parts = cleanRemote.replace(/\/+$/, '').split('/');
+        const slug = parts[parts.length - 1] || '';
+        if (safeCatFolder && slug) {
+          fallbackSrc = `${remoteDomain}/productos/${safeCatFolder}/${slug}/foto.webp`;
+        }
+      }
     } else {
       const safeFolder = rawFolder.replace(/[^a-zA-Z0-9_\-\/]/g, '');
-      const remoteDomain = 'https://tenchamatcheria.com';
       if (isRec || safeFolder.startsWith('productos/')) {
         imgSrc = `${remoteDomain}/${safeFolder.replace(/^\/+/, '')}${safeFolder.endsWith('/') ? '' : '/'}foto.webp`;
       } else {
         imgSrc = `${remoteDomain}/productos/${safeCatFolder}/${safeFolder}/foto.webp`;
       }
+      fallbackSrc = '../assets/logo-kori.png';
     }
 
     const numId = Number(item.id) || 0;
@@ -525,7 +540,7 @@
       return `
         <div class="prod-card ${item.disponible ? '' : 'disabled'} ${isAgotado ? 'agotado' : ''}" id="card-rec-${numId}">
           <div class="prod-card-top">
-            <img class="prod-thumb" src="${esc(imgSrc)}" onerror="this.onerror=null;this.src='logo.png';" alt="${esc(item.nombre)}">
+            <img class="prod-thumb" src="${esc(imgSrc)}" data-fallback="${esc(fallbackSrc)}" onerror="if(this.dataset.fallback && !this.dataset.triedFallback){this.dataset.triedFallback='true';this.src=this.dataset.fallback;}else{this.onerror=null;this.src='../assets/logo-kori.png';}" alt="${esc(item.nombre)}">
             <div class="prod-info">
               <div class="prod-name" title="${esc(item.nombre)}">
                 ${esc(item.nombre)}
@@ -580,7 +595,7 @@
     return `
       <div class="prod-card ${item.disponible ? '' : 'disabled'} ${isAgotado ? 'agotado' : ''}" id="card-prod-${numId}">
         <div class="prod-card-top">
-          <img class="prod-thumb" src="${esc(imgSrc)}" onerror="this.onerror=null;this.src='logo.png';" alt="${esc(item.nombre)}">
+          <img class="prod-thumb" src="${esc(imgSrc)}" data-fallback="${esc(fallbackSrc)}" onerror="if(this.dataset.fallback && !this.dataset.triedFallback){this.dataset.triedFallback='true';this.src=this.dataset.fallback;}else{this.onerror=null;this.src='../assets/logo-kori.png';}" alt="${esc(item.nombre)}">
           <div class="prod-info">
             <div class="prod-name" title="${esc(item.nombre)}">
               ${esc(item.nombre)}
