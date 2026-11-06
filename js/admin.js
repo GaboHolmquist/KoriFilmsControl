@@ -279,20 +279,22 @@
     localStorage.removeItem('kfc_active_session');
     try { await dbClient.auth.signOut(); } catch (_) {}
     state.user = null;
-    showLogin();
+    const isInsideControl = window.location.pathname.includes('/control');
+    window.location.replace(isInsideControl ? 'index.html' : 'control/index.html');
   }
 
   function showLogin() {
-    document.getElementById('loginView').style.display = 'flex';
-    document.getElementById('dashboardView').style.display = 'none';
-    document.getElementById('topbarActions').style.display = 'none';
-    checkLockoutStatus();
+    const isInsideControl = window.location.pathname.includes('/control');
+    window.location.replace(isInsideControl ? 'index.html' : 'control/index.html');
   }
 
   function showDashboard() {
-    document.getElementById('loginView').style.display = 'none';
-    document.getElementById('dashboardView').style.display = 'block';
-    document.getElementById('topbarActions').style.display = 'flex';
+    const loginEl = document.getElementById('loginView');
+    if (loginEl) loginEl.style.display = 'none';
+    const dashEl = document.getElementById('dashboardView');
+    if (dashEl) dashEl.style.display = 'block';
+    const topbar = document.getElementById('topbarActions');
+    if (topbar) topbar.style.display = 'flex';
 
     const btnNew = document.getElementById('btnNewProduct');
     if (btnNew) btnNew.style.display = canAddOrDelete() ? 'inline-flex' : 'none';
