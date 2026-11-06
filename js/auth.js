@@ -39,6 +39,19 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // Botón Volver / Cerrar (X) que devuelve a la página anterior
+  const closeBtn = document.getElementById('auth-close-btn');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (window.history.length > 1 && document.referrer) {
+        window.history.back();
+      } else {
+        window.location.href = '../';
+      }
+    });
+  }
 });
 
 // ------------------------------------------------------------------------------

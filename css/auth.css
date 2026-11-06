@@ -41,6 +41,44 @@
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
 }
 
+/* ------------------------------------------------------------------------------
+   BOTÓN VOLVER / CERRAR (X)
+   ------------------------------------------------------------------------------ */
+.auth-close-btn {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 10;
+}
+
+.auth-close-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  transform: scale(1.06);
+}
+
+.auth-close-btn:active {
+  transform: scale(0.94);
+}
+
+.auth-close-btn:focus-visible {
+  outline: 2px solid var(--accent-matcha);
+  outline-offset: 2px;
+}
+
 .auth-brand-header {
   text-align: center;
   margin-bottom: 2rem;
