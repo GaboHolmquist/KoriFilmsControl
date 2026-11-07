@@ -1115,6 +1115,90 @@
       border-radius: 4px;
     }
 
+    /* =========================================================================
+       FOOTER (INSTAGRAM & CREDITOS - IDÉNTICO A TENCHA)
+       ========================================================================= */
+    .footer {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 45px 0 110px;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .footer a.ig-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 10px 22px;
+      margin-bottom: 22px;
+      border-radius: 999px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+      text-decoration: none;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s ease, border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+    }
+
+    .footer a.ig-pill span {
+      color: var(--text);
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+
+    .footer a.ig-pill:hover,
+    .footer a.ig-pill:active {
+      color: var(--text);
+      border-color: var(--matcha);
+      background: var(--bg-card-hover);
+      transform: translateY(-2px);
+    }
+
+    .footer a.ig-pill:hover span {
+      color: var(--matcha);
+    }
+
+    .footer .ig-icon {
+      width: 17px;
+      height: 17px;
+      color: var(--matcha);
+      flex-shrink: 0;
+    }
+
+    .footer a.footer-credit {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.76rem;
+      letter-spacing: 0.08em;
+      transition: color 0.2s ease, transform 0.2s ease;
+      display: inline-block;
+    }
+
+    .footer a.footer-credit span {
+      color: var(--text);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      transition: color 0.2s ease;
+    }
+
+    .footer a.footer-credit:hover {
+      color: var(--matcha);
+      transform: translateY(-1px);
+    }
+
+    .footer a.footer-credit:hover span {
+      color: var(--matcha);
+    }
+
     /* BARRA FLOTANTE FIJA INFERIOR — BOTÓN PANEL DE CONTROL */
     .control-dock {
       position: fixed;
@@ -1881,6 +1965,21 @@
         <!-- Renderizado dinámico de categorías y productos según el formato elegido -->
       </div>
     </section>
+
+    <!-- FOOTER CON ENLACES AL INSTAGRAM DE KORI FILMS -->
+    <footer class="footer">
+      <a href="https://www.instagram.com/kori.films/" target="_blank" rel="noopener noreferrer" class="ig-pill" title="Recuerda seguirnos en Instagram">
+        <svg class="ig-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+          <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+        </svg>
+        <span>Recuerda seguirnos en Instagram</span>
+      </a>
+      <a href="https://www.instagram.com/kori.films/" target="_blank" rel="noopener noreferrer" class="footer-credit" title="Ir a Kori Films en Instagram">
+        Carta Digital por <span>KORI.FILMS</span>
+      </a>
+    </footer>
   </main>
 
   <!-- BARRA FIJA FLOTANTE INFERIOR -->
