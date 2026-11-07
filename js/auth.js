@@ -3,17 +3,26 @@
 // ==============================================================================
 
 import { CONFIG } from './config.js';
-import { getSupabase } from './supabase-client.js';
-import { getCurrentSession, isSuperadmin, getAssignedLocalForUser } from './auth-guard.js';
+import { getDbClient } from './data-client.js';
+import { isSuperadmin, getAssignedLocalForUser } from './auth-guard.js';
 
 let countdownInterval = null;
 
-document.addEventListener('DOMContentLoaded', () => {
-  // Si ya hay una sesión activa válida, redirigir automáticamente
-  const existingSession = getCurrentSession();
-  if (existingSession) {
-    redirectUser(existingSession.email);
-    return;
+document.addEventListener('DOMContentLoaded', async () => {
+  // Verificar si ya existe una sesión criptográfica activa real
+  const client = getDbClient();
+  if (client) {
+    try {
+      const { data: { session } } = await client.auth.getSession();
+      if (session && session.user && session.user.email) {
+        redirectUser(session.user.email);
+        return;
+      } else {
+        localStorage.removeItem(CONFIG.sessionStorageKey);
+      }
+    } catch (_) {
+      localStorage.removeItem(CONFIG.sessionStorageKey);
+    }
   }
 
   // Verificar estado de bloqueo por fuerza bruta al cargar
@@ -73,7 +82,6 @@ export function registerFailedAttempt() {
   localStorage.setItem(CONFIG.security.storageKeyAttempts, currentAttempts.toString());
 
   if (currentAttempts >= CONFIG.security.maxFailedAttempts) {
-    // Activar bloqueo de 1 minuto
     const lockoutUntil = Date.now() + CONFIG.security.lockoutDurationMs;
     localStorage.setItem(CONFIG.security.storageKeyLockoutUntil, lockoutUntil.toString());
     startLockoutTimer(lockoutUntil);
@@ -98,7 +106,6 @@ function checkLockoutStatus() {
   if (lockoutUntil && Date.now() < lockoutUntil) {
     startLockoutTimer(lockoutUntil);
   } else if (lockoutUntil && Date.now() >= lockoutUntil) {
-    // El bloqueo ya expiró
     resetSecurityState();
     hideLockoutAlert();
   }
@@ -111,7 +118,6 @@ function startLockoutTimer(lockoutUntil) {
   const emailInput = document.getElementById('email-input');
   const passwordInput = document.getElementById('password-input');
 
-  // Deshabilitar inputs y botón
   if (submitBtn) submitBtn.disabled = true;
   if (emailInput) emailInput.disabled = true;
   if (passwordInput) passwordInput.disabled = true;
@@ -156,13 +162,12 @@ function hideLockoutAlert() {
 }
 
 // ------------------------------------------------------------------------------
-// PROCESAMIENTO DE LOGIN
+// PROCESAMIENTO DE LOGIN (AUTENTICACIÓN ESTRICTA CON SERVIDOR)
 // ------------------------------------------------------------------------------
 
 async function handleLoginSubmit(e) {
   e.preventDefault();
 
-  // Verificar si está bloqueado
   const lockoutUntil = getLockoutUntil();
   if (lockoutUntil && Date.now() < lockoutUntil) {
     return;
@@ -182,74 +187,44 @@ async function handleLoginSubmit(e) {
     return;
   }
 
-  // Estado de carga
   if (submitBtn) submitBtn.disabled = true;
   if (submitText) submitText.textContent = 'Verificando acceso...';
   if (submitSpinner) submitSpinner.classList.remove('hidden');
   clearMessages();
 
   try {
-    const client = getSupabase();
-    let authSuccess = false;
-    let authUser = null;
-
-    if (client) {
-      const { data, error } = await client.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (!error && data?.user) {
-        authSuccess = true;
-        authUser = data.user;
-      } else {
-        console.warn('Supabase Auth error o usuario no registrado en Auth:', error?.message);
-      }
+    const client = getDbClient();
+    if (!client) {
+      throw new Error('Servicio de autenticación no disponible.');
     }
 
-    // Si Supabase Auth aún no tiene el usuario creado en Auth users, permitimos
-    // el acceso maestro a admin@korifilms.cl con su contraseña configurada o acceso inicial
-    if (!authSuccess) {
-      // Verificación de credenciales de desarrollo/emergencia para superadmin y usuarios de local
-      const isSuper = email === CONFIG.superadminEmail.toLowerCase();
-      const isTenchaUser = email === 'contacto@tencha.cl';
+    const { data, error } = await client.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-      if (isSuper || isTenchaUser) {
-        // En caso de que se use para pruebas o primera configuración
-        // Para superadmin se requiere una contraseña no vacía de al menos 6 caracteres
-        if (password.length >= 6) {
-          authSuccess = true;
-          authUser = {
-            id: isSuper ? 'superadmin-kori' : 'user-tencha',
-            email: email,
-            role: isSuper ? 'superadmin' : 'admin_local',
-          };
-        }
-      }
-    }
-
-    if (authSuccess) {
-      // Login correcto: resetear intentos fallidos
+    if (!error && data?.user && data?.session) {
       resetSecurityState();
 
-      // Guardar sesión activa (duración 12 horas)
+      const authUser = data.user;
       const session = {
         userId: authUser.id,
-        email: email,
-        rol: isSuperadmin(email) ? 'superadmin' : 'admin_local',
-        nombre: isSuperadmin(email) ? 'Kori Films Admin' : email.split('@')[0],
+        email: authUser.email.toLowerCase(),
+        rol: isSuperadmin(authUser.email) ? 'superadmin' : 'admin_local',
+        nombre: isSuperadmin(authUser.email) ? 'Kori Films Admin' : authUser.email.split('@')[0],
         createdAt: Date.now(),
         expiresAt: Date.now() + 12 * 60 * 60 * 1000,
       };
 
       localStorage.setItem(CONFIG.sessionStorageKey, JSON.stringify(session));
+      localStorage.setItem('kfc_admin_last_activity', Date.now().toString());
 
       if (submitText) submitText.textContent = '¡Acceso concedido!';
       showSuccess('Acceso exitoso. Redirigiendo a la plataforma...');
 
       setTimeout(() => {
-        redirectUser(email);
-      }, 700);
+        redirectUser(authUser.email);
+      }, 600);
       return;
     }
 
@@ -266,8 +241,7 @@ async function handleLoginSubmit(e) {
       );
     }
   } catch (err) {
-    console.error('Error durante el inicio de sesión:', err);
-    showError('Ocurrió un error inesperado al conectar con el servidor.');
+    showError('Ocurrió un error al verificar tus credenciales.');
   } finally {
     const isLocked = getLockoutUntil() && Date.now() < getLockoutUntil();
     if (!isLocked && submitBtn) {
@@ -291,7 +265,6 @@ export function redirectUser(email) {
   }
 }
 
-// Helpers visuales para mensajes
 function showError(msg) {
   const msgEl = document.getElementById('login-message');
   if (msgEl) {

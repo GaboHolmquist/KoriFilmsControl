@@ -12,20 +12,6 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    
-    /* Ocultar cualquier widget o globo de Netlify */
-    [data-netlify-drawer],
-    #netlify-drawer,
-    .netlify-drawer-container,
-    [class*="netlify-drawer"],
-    [class*="netlify-feedback"],
-    iframe[src*="netlify"],
-    div[id*="netlify"] {
-      display: none !important;
-      visibility: hidden !important;
-      opacity: 0 !important;
-      pointer-events: none !important;
-    }
 
     body {
       background: var(--bg);

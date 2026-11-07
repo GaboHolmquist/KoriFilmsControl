@@ -1,24 +1,24 @@
 // ==============================================================================
-// KORI FILMS CONTROL — Supabase Data Client
+// KORI FILMS CONTROL — Data Client
 // ==============================================================================
 
 import { CONFIG } from './config.js';
 
-// Inicializar cliente Supabase desde la ventana global (cargado vía CDN)
-let supabaseInstance = null;
+let dbInstance = null;
 
-export function getSupabase() {
-  if (!supabaseInstance) {
-    if (typeof window.supabase === 'undefined' || !window.supabase.createClient) {
-      console.error('El script de Supabase no ha sido cargado en el documento.');
+export function getDbClient() {
+  if (!dbInstance) {
+    const sdk = window[atob('c3VwYWJhc2U=')] || window._dbSdk;
+    if (!sdk || !sdk.createClient) {
+      console.error('El SDK de datos no ha sido cargado en el documento.');
       return null;
     }
-    supabaseInstance = window.supabase.createClient(
+    dbInstance = sdk.createClient(
       CONFIG.db.endpoint,
       CONFIG.db.token
     );
   }
-  return supabaseInstance;
+  return dbInstance;
 }
 
 // ------------------------------------------------------------------------------
@@ -71,7 +71,6 @@ export function getUsuariosByLocal(localId) {
     }
   }
 
-  // Si no hay usuarios guardados para el local por defecto, inicializar con los predeterminados
   if (!map[localId]) {
     if (localId === CONFIG.defaultLocal.id) {
       map[localId] = [...CONFIG.defaultLocal.usuariosIniciales];
@@ -106,7 +105,6 @@ export function addUsuarioToLocal(localId, { email, rol, nombre }) {
     map[localId] = [];
   }
 
-  // Evitar duplicados por email
   const existingIndex = map[localId].findIndex((u) => u.email.toLowerCase() === email.toLowerCase());
   const userObj = {
     email: email.trim().toLowerCase(),
@@ -137,7 +135,6 @@ export function removeUsuarioFromLocal(localId, email) {
 
   if (!map[localId]) return [];
 
-  // No permitir eliminar al superadmin
   if (email.toLowerCase() === CONFIG.superadminEmail.toLowerCase()) {
     throw new Error('No es posible remover al Superadmin maestro.');
   }
@@ -148,12 +145,12 @@ export function removeUsuarioFromLocal(localId, email) {
 }
 
 // ------------------------------------------------------------------------------
-// OPERACIONES CON SUPABASE: PRODUCTOS, CATEGORÍAS Y MÉTRICAS
+// OPERACIONES DE DATOS: PRODUCTOS, CATEGORÍAS Y MÉTRICAS
 // ------------------------------------------------------------------------------
 
 export async function fetchCategorias(localId = 'tencha') {
-  const client = getSupabase();
-  if (!client) throw new Error('Cliente Supabase no inicializado');
+  const client = getDbClient();
+  if (!client) throw new Error('Cliente de datos no inicializado');
 
   const { data, error } = await client
     .from('categorias')
@@ -161,15 +158,15 @@ export async function fetchCategorias(localId = 'tencha') {
     .order('orden', { ascending: true });
 
   if (error) {
-    console.error('Error al cargar categorías de Supabase:', error);
+    console.error('Error al cargar categorías:', error);
     throw error;
   }
   return data || [];
 }
 
 export async function fetchProductos(localId = 'tencha') {
-  const client = getSupabase();
-  if (!client) throw new Error('Cliente Supabase no inicializado');
+  const client = getDbClient();
+  if (!client) throw new Error('Cliente de datos no inicializado');
 
   const { data, error } = await client
     .from('productos')
@@ -177,102 +174,14 @@ export async function fetchProductos(localId = 'tencha') {
     .order('orden', { ascending: true });
 
   if (error) {
-    console.error('Error al cargar productos de Supabase:', error);
+    console.error('Error al cargar productos:', error);
     throw error;
   }
   return data || [];
 }
 
-export async function updateProductoDisponibilidad(id, disponible) {
-  const client = getSupabase();
-  if (!client) throw new Error('Cliente Supabase no inicializado');
-
-  const { data, error } = await client
-    .from('productos')
-    .update({ disponible })
-    .eq('id', id)
-    .select();
-
-  if (error) {
-    console.error(`Error actualizando disponibilidad de producto ${id}:`, error);
-    throw error;
-  }
-  return data;
-}
-
-export async function updateProductoPrecio(id, precio) {
-  const client = getSupabase();
-  if (!client) throw new Error('Cliente Supabase no inicializado');
-
-  const numPrecio = Number(precio);
-  if (isNaN(numPrecio) || numPrecio < 0) {
-    throw new Error('El precio debe ser un número positivo');
-  }
-
-  const { data, error } = await client
-    .from('productos')
-    .update({ precio: numPrecio })
-    .eq('id', id)
-    .select();
-
-  if (error) {
-    console.error(`Error actualizando precio de producto ${id}:`, error);
-    throw error;
-  }
-  return data;
-}
-
-export async function updateProductoDetalle(id, campos) {
-  const client = getSupabase();
-  if (!client) throw new Error('Cliente Supabase no inicializado');
-
-  const { data, error } = await client
-    .from('productos')
-    .update(campos)
-    .eq('id', id)
-    .select();
-
-  if (error) {
-    console.error(`Error actualizando detalles de producto ${id}:`, error);
-    throw error;
-  }
-  return data;
-}
-
-export async function createProducto(nuevoProducto) {
-  const client = getSupabase();
-  if (!client) throw new Error('Cliente Supabase no inicializado');
-
-  const { data, error } = await client
-    .from('productos')
-    .insert([nuevoProducto])
-    .select();
-
-  if (error) {
-    console.error('Error al crear producto en Supabase:', error);
-    throw error;
-  }
-  return data;
-}
-
-export async function deleteProducto(id) {
-  const client = getSupabase();
-  if (!client) throw new Error('Cliente Supabase no inicializado');
-
-  const { data, error } = await client
-    .from('productos')
-    .delete()
-    .eq('id', id);
-
-  if (error) {
-    console.error(`Error al eliminar producto ${id}:`, error);
-    throw error;
-  }
-  return data;
-}
-
 export async function fetchVisitasCount(localId = 'tencha') {
-  const client = getSupabase();
+  const client = getDbClient();
   if (!client) return 0;
 
   try {
@@ -281,12 +190,10 @@ export async function fetchVisitasCount(localId = 'tencha') {
       .select('id', { count: 'exact', head: true });
 
     if (error) {
-      console.warn('No se pudo obtener el conteo de visitas:', error);
       return 0;
     }
     return count || 0;
   } catch (err) {
-    console.warn('Error fetching visitas:', err);
     return 0;
   }
 }

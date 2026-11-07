@@ -12,13 +12,13 @@ import {
   fetchProductos,
   fetchCategorias,
   fetchVisitasCount,
-} from './supabase-client.js';
+} from './data-client.js';
 
 let activeLocalForUsersModal = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // Proteger la página: solo superadmin
-  const session = requireAuth({ requireSuperadmin: true });
+  // Proteger la página: exige sesión criptográfica válida y rol superadmin
+  const session = await requireAuth({ requireSuperadmin: true });
   if (!session) return;
 
   // Cargar datos iniciales
@@ -35,7 +35,6 @@ async function loadHubData() {
   try {
     const locales = getLocales();
 
-    // Obtener métricas reales de Supabase para Tencha
     const [productos, categorias, totalVisitas] = await Promise.all([
       fetchProductos('tencha').catch(() => []),
       fetchCategorias('tencha').catch(() => []),
@@ -46,7 +45,6 @@ async function loadHubData() {
     const disponibles = productos.filter((p) => p.disponible !== false).length;
     const pausados = totalProductos - disponibles;
 
-    // Actualizar KPIs superiores
     renderKPICards({
       totalLocales: locales.length,
       totalProductos,
@@ -56,11 +54,9 @@ async function loadHubData() {
       totalVisitas,
     });
 
-    // Renderizar lista de locales gastronómicos
     renderLocalesList(locales, { totalProductos, disponibles, pausados, categoriasCount: categorias.length });
   } catch (error) {
-    console.error('Error cargando datos del Hub:', error);
-    showNotification('Error al cargar datos de Supabase', 'error');
+    showNotification('Error al cargar métricas del servidor', 'error');
   } finally {
     if (loadingEl) loadingEl.classList.add('hidden');
     if (contentEl) contentEl.classList.remove('hidden');
@@ -182,18 +178,13 @@ function renderLocalesList(locales, tenchaStats) {
     container.appendChild(card);
   });
 
-  // Listener para botones de gestionar usuarios
   document.querySelectorAll('.btn-manage-users').forEach((btn) => {
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', () => {
       const localId = btn.getAttribute('data-local-id');
       openUsersModal(localId);
     });
   });
 }
-
-// ------------------------------------------------------------------------------
-// MODAL DE GESTIÓN DE USUARIOS
-// ------------------------------------------------------------------------------
 
 function openUsersModal(localId) {
   activeLocalForUsersModal = localId;
@@ -247,7 +238,6 @@ function renderUsersInModal(localId) {
     listEl.appendChild(row);
   });
 
-  // Listeners para eliminar usuario
   listEl.querySelectorAll('.btn-remove-user').forEach((btn) => {
     btn.addEventListener('click', () => {
       const email = btn.getAttribute('data-email');
@@ -266,7 +256,6 @@ function renderUsersInModal(localId) {
 }
 
 function setupModalListeners() {
-  // Modal de usuarios: cerrar
   const closeUsersModalBtn = document.getElementById('close-users-modal-btn');
   const usersModal = document.getElementById('users-modal');
   if (closeUsersModalBtn && usersModal) {
@@ -276,7 +265,6 @@ function setupModalListeners() {
     });
   }
 
-  // Formulario para agregar usuario a local
   const addUserForm = document.getElementById('add-user-form');
   if (addUserForm) {
     addUserForm.addEventListener('submit', (e) => {
@@ -300,7 +288,6 @@ function setupModalListeners() {
     });
   }
 
-  // Modal para agregar nuevo local
   const btnNewLocal = document.getElementById('btn-new-local');
   const newLocalModal = document.getElementById('new-local-modal');
   const closeNewLocalModalBtn = document.getElementById('close-new-local-modal-btn');

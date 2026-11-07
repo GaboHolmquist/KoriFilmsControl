@@ -3,14 +3,13 @@
 // ==============================================================================
 
 import { CONFIG } from './config.js';
-import { getUsuariosByLocal, getLocales } from './supabase-client.js';
+import { getDbClient, getUsuariosByLocal, getLocales } from './data-client.js';
 
 export function getCurrentSession() {
   const sessionData = localStorage.getItem(CONFIG.sessionStorageKey);
   if (!sessionData) return null;
   try {
     const session = JSON.parse(sessionData);
-    // Verificar si expiró la sesión (por ejemplo 12 horas)
     if (session.expiresAt && Date.now() > session.expiresAt) {
       logout();
       return null;
@@ -26,9 +25,6 @@ export function isSuperadmin(email) {
   return email.trim().toLowerCase() === CONFIG.superadminEmail.toLowerCase();
 }
 
-/**
- * Determina a qué local tiene acceso un usuario no-superadmin
- */
 export function getAssignedLocalForUser(email) {
   const normalizedEmail = email.trim().toLowerCase();
   const locales = getLocales();
@@ -40,42 +36,61 @@ export function getAssignedLocalForUser(email) {
       return local;
     }
   }
-  // Si no está registrado en ningún otro, por defecto asignado a Tencha
   return CONFIG.defaultLocal;
 }
 
 /**
- * Protege la página actual según el rol del usuario
+ * Protege la página actual exigiendo sesión criptográfica válida y rol requerido
  */
-export function requireAuth({ requireSuperadmin = false } = {}) {
-  const session = getCurrentSession();
+export async function requireAuth({ requireSuperadmin = false } = {}) {
+  const client = getDbClient();
+  let verifiedEmail = null;
+  let verifiedId = null;
 
-  if (!session) {
-    // Redirigir al login si no hay sesión
+  if (client) {
+    try {
+      const { data: { session: serverSession } } = await client.auth.getSession();
+      if (serverSession && serverSession.user && serverSession.user.email) {
+        verifiedEmail = serverSession.user.email.toLowerCase();
+        verifiedId = serverSession.user.id;
+      }
+    } catch (_) {}
+  }
+
+  // Si no hay sesión real verificada por token JWT, cerrar y redirigir al login
+  if (!verifiedEmail) {
+    localStorage.removeItem(CONFIG.sessionStorageKey);
     const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
-    window.location.href = `index.html?returnUrl=${returnUrl}`;
+    window.location.replace(`index.html?returnUrl=${returnUrl}`);
     return null;
   }
+
+  const session = {
+    userId: verifiedId,
+    email: verifiedEmail,
+    rol: isSuperadmin(verifiedEmail) ? 'superadmin' : 'admin_local',
+  };
 
   const superadmin = isSuperadmin(session.email);
 
-  // Si la página requiere superadmin (como hub.html) y el usuario no lo es:
   if (requireSuperadmin && !superadmin) {
-    console.warn('Acceso denegado: Usuario sin permisos de Superadmin. Redirigiendo a su local.');
     const assignedLocal = getAssignedLocalForUser(session.email);
-    window.location.href = `menu.html?local=${assignedLocal.id}`;
+    window.location.replace(`menu.html?local=${assignedLocal.id}`);
     return null;
   }
 
-  // Renderizar información de usuario en la barra si los elementos existen
   updateNavbarUserInfo(session, superadmin);
-
   return session;
 }
 
-export function logout() {
+export async function logout() {
   localStorage.removeItem(CONFIG.sessionStorageKey);
-  window.location.href = 'index.html';
+  localStorage.removeItem('kfc_admin_last_activity');
+  const client = getDbClient();
+  if (client) {
+    try { await client.auth.signOut(); } catch (_) {}
+  }
+  window.location.replace('index.html');
 }
 
 function updateNavbarUserInfo(session, superadmin) {

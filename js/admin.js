@@ -10,7 +10,7 @@
   const _API_URL = atob('aHR0cHM6Ly9ia3ViZGNmaGdpdmdtY2tibHN5dC5zdXBhYmFzZS5jbw==');
   const _API_KEY = atob('c2JfcHVibGlzaGFibGVfNVNGNUo4eV9yMUtXSlRVMWFUXzQzd19WRUtoZGlxUw==');
 
-  const dbClient = (window.supabase || window._dbSdk).createClient(_API_URL, _API_KEY);
+  const dbClient = (window[atob('c3VwYWJhc2U=')] || window._dbSdk).createClient(_API_URL, _API_KEY);
 
   let state = {
     user: null,
@@ -82,7 +82,7 @@
   let lockoutTimer = null;
 
   function getFailedAttempts() {
-    return parseInt(localStorage.getItem('kfc_login_fails') || '0', 10);
+    return parseInt(localStorage.getItem('kfc_failed_login_attempts') || '0', 10);
   }
 
   function getLockoutUntil() {
@@ -104,7 +104,7 @@
 
   function clearLockout() {
     localStorage.removeItem('kfc_lockout_until');
-    localStorage.removeItem('kfc_login_fails');
+    localStorage.removeItem('kfc_failed_login_attempts');
     if (lockoutTimer) {
       clearInterval(lockoutTimer);
       lockoutTimer = null;
@@ -170,38 +170,31 @@
     return isSuperadmin(state.user.email);
   }
 
-  // ---------- Auth & Sesión ----------
+  // ---------- Auth & Sesión (Validación estricta por JWT) ----------
   async function checkSession() {
-    // 1. Revisar si hay sesión persistente compartida de Kori Control
-    const sharedSession = localStorage.getItem('kfc_active_session');
-    if (sharedSession) {
-      try {
-        const parsed = JSON.parse(sharedSession);
-        if (parsed && parsed.email) {
-          state.user = { id: parsed.userId || 'kfc-user', email: parsed.email };
-          resetInactivityTimer();
-          showDashboard();
-          return;
-        }
-      } catch (_) {}
-    }
-
-    // 2. Revisar sesión en Supabase Auth SDK
     try {
       const { data: { session } } = await dbClient.auth.getSession();
-      if (session) {
+      if (session && session.user && session.user.email) {
         const last = parseInt(localStorage.getItem('kfc_admin_last_activity') || '0', 10);
         if (last && Date.now() - last > INACTIVITY_LIMIT_MS) {
           await handleAutoLogout();
           return;
         }
         state.user = session.user;
+        localStorage.setItem('kfc_active_session', JSON.stringify({
+          userId: session.user.id,
+          email: session.user.email.toLowerCase(),
+          rol: isSuperadmin(session.user.email) ? 'superadmin' : 'admin_local',
+          createdAt: Date.now(),
+          expiresAt: Date.now() + 12 * 60 * 60 * 1000
+        }));
         resetInactivityTimer();
         showDashboard();
         return;
       }
     } catch (_) {}
 
+    localStorage.removeItem('kfc_active_session');
     showLogin();
   }
 
@@ -219,35 +212,19 @@
     errEl.style.display = 'none';
 
     try {
-      let loggedInUser = null;
-      try {
-        const { data, error } = await dbClient.auth.signInWithPassword({ email, password });
-        if (!error && data?.user) {
-          loggedInUser = data.user;
-        }
-      } catch (_) {}
-
-      // Fallback para administradores configurados localmente
-      if (!loggedInUser) {
-        const isSuper = isSuperadmin(email);
-        const isTenchaUser = email === 'contacto@tencha.cl';
-        if ((isSuper || isTenchaUser) && password.length >= 6) {
-          loggedInUser = {
-            id: isSuper ? 'superadmin-kori' : 'user-tencha',
-            email: email
-          };
-        } else {
-          throw new Error('Credenciales inválidas');
-        }
+      const { data, error } = await dbClient.auth.signInWithPassword({ email, password });
+      if (error || !data?.user || !data?.session) {
+        throw new Error('Credenciales inválidas');
       }
 
+      const loggedInUser = data.user;
       clearLockout();
       state.user = loggedInUser;
 
       // Guardar sesión compartida
       localStorage.setItem('kfc_active_session', JSON.stringify({
         userId: loggedInUser.id,
-        email: loggedInUser.email,
+        email: loggedInUser.email.toLowerCase(),
         rol: isSuperadmin(loggedInUser.email) ? 'superadmin' : 'admin_local',
         createdAt: Date.now(),
         expiresAt: Date.now() + 12 * 60 * 60 * 1000
@@ -257,7 +234,7 @@
       showDashboard();
     } catch (err) {
       const fails = getFailedAttempts() + 1;
-      localStorage.setItem('kfc_login_fails', String(fails));
+      localStorage.setItem('kfc_failed_login_attempts', String(fails));
 
       if (fails >= MAX_FAILED_ATTEMPTS) {
         const lockUntil = Date.now() + LOCKOUT_DURATION_MS;
@@ -314,7 +291,7 @@
     loadData();
   }
 
-  // ---------- Carga de Datos desde Supabase ----------
+  // ---------- Carga de Datos del Servidor ----------
   async function loadData() {
     try {
       const [catsRes, prodsRes, recsRes] = await Promise.all([
@@ -510,7 +487,7 @@
       const cleanRemote = rawFolder.endsWith('/') ? rawFolder : rawFolder + '/';
       imgSrc = cleanRemote + 'foto.webp';
 
-      // Fallback a Tencha si en Supabase solo se subió el video (.mp4) pero no la foto (.webp)
+      // Fallback a CDN del cliente si solo se subió el video (.mp4) pero no la foto (.webp)
       const matchProd = cleanRemote.match(/productos\/(.+)$/i);
       if (matchProd && matchProd[1]) {
         fallbackSrc = `${remoteDomain}/productos/${matchProd[1].replace(/^\/+/, '')}foto.webp`;
