@@ -149,12 +149,12 @@
       transform: scale(1.02);
     }
 
-    /* Botón principal: Acceso a cartas digitales */
+    /* Botón principal: Acceso a carta demo */
     .main-action-wrap {
       width: 100%;
       display: flex;
       justify-content: center;
-      margin-bottom: 3rem;
+      margin-bottom: 2.25rem;
     }
 
     .cta-main {
@@ -182,7 +182,7 @@
       transform: translateY(0);
     }
 
-    /* Sección inferior: Cartas disponibles */
+    /* Sección intermedia: Cartas disponibles */
     .available-menus-section {
       width: 100%;
       display: flex;
@@ -247,6 +247,46 @@
       flex-shrink: 0;
     }
 
+    /* Sección inferior: Acceso a cartas digitales (Control / Administración) */
+    .admin-access-section {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 1.75rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .cta-admin-access {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0.85rem 1.6rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      color: #cbd5e1;
+      font-size: 0.92rem;
+      font-weight: 500;
+      text-decoration: none;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .cta-admin-access:hover {
+      background: rgba(16, 185, 129, 0.08);
+      border-color: rgba(16, 185, 129, 0.3);
+      color: #6ee7b7;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .cta-admin-access:active {
+      transform: translateY(0);
+    }
+
     /* Footer sutil */
     .landing-footer {
       border-top: 1px solid rgba(255, 255, 255, 0.04);
@@ -285,6 +325,11 @@
         width: 100%;
         justify-content: center;
       }
+
+      .cta-admin-access {
+        width: 100%;
+        justify-content: center;
+      }
     }
   </style>
 </head>
@@ -311,17 +356,17 @@
     <!-- Logo Kori Films -->
     <img src="assets/logo-kori.png" alt="Kori Films" class="hero-logo-img">
 
-    <!-- Botón Acceso a Cartas Digitales -->
+    <!-- 1. Botón Principal: Acceso a Carta Demo (Verde) -->
     <div class="main-action-wrap">
-      <a href="control/" class="cta-main">
-        <span>Acceso a cartas digitales</span>
+      <a href="demo.html" class="cta-main">
+        <span>Acceso a carta demo</span>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M5 12h14M12 5l7 7-7 7"></path>
         </svg>
       </a>
     </div>
 
-    <!-- Sección Cartas Disponibles -->
+    <!-- 2. Sección: Cartas Disponibles -->
     <div class="available-menus-section">
       <span class="available-menus-label">Cartas disponibles</span>
       <div class="menus-list">
@@ -333,6 +378,20 @@
           </svg>
         </a>
       </div>
+    </div>
+
+    <!-- 3. Acceso a las Cartas Digitales (Administración / Plataforma) -->
+    <div class="admin-access-section">
+      <a href="control/" class="cta-admin-access">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+        <span>Acceso a cartas digitales</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14M12 5l7 7-7 7"></path>
+        </svg>
+      </a>
     </div>
   </main>
 

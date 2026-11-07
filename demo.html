@@ -1,0 +1,2851 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="oscuro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Carta Digital Interactiva — Demo en Vivo | Kori Films</title>
+  <meta name="description" content="Demostración interactiva de carta digital gastronómica con carrusel automático, barra de categorías y panel de control en tiempo real.">
+  <meta name="theme-color" content="#09090b">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="favicon.png">
+  <link rel="apple-touch-icon" href="favicon.png">
+
+  <style>
+    /* =========================================================================
+       SISTEMA DE PALETAS DE COLOR DINÁMICAS (BEIGE POR DEFECTO, MARRÓN T, OSCURO, AZUL)
+       ========================================================================= */
+
+    /* 1. BEIGE CÁLIDO (POR DEFECTO - Estilo Café / Cerámica Japonesa) */
+    :root, [data-theme="beige"] {
+      --bg: #f6f1ea;
+      --bg-card: #ffffff;
+      --bg-card-hover: #fcf9f5;
+      --border: rgba(45, 35, 25, 0.09);
+      --border-focus: rgba(5, 150, 105, 0.5);
+      --matcha: #059669;
+      --matcha-glow: rgba(5, 150, 105, 0.22);
+      --text: #211c18;
+      --text-muted: #78716c;
+      --danger: #dc2626;
+      --danger-bg: rgba(220, 38, 38, 0.1);
+      --dock-bg: rgba(255, 255, 255, 0.95);
+      --drawer-bg: #faf7f2;
+      --card-shadow: 0 4px 18px rgba(35, 25, 15, 0.05);
+      --banner-bg: linear-gradient(135deg, rgba(5, 150, 105, 0.08) 0%, rgba(217, 119, 6, 0.06) 100%);
+      --switch-off: #cbd5e1;
+      --cat-bar-bg: rgba(246, 241, 234, 0.92);
+    }
+
+    /* 2. MARRÓN T (Tostado Hojicha / Cacao Profundo) */
+    [data-theme="marron"] {
+      --bg: #1c1512;
+      --bg-card: #271e1a;
+      --bg-card-hover: #322621;
+      --border: rgba(255, 235, 215, 0.1);
+      --border-focus: rgba(234, 179, 8, 0.45);
+      --matcha: #10b981;
+      --matcha-glow: rgba(16, 185, 129, 0.3);
+      --text: #fbf5ee;
+      --text-muted: #bcaaa4;
+      --danger: #ef4444;
+      --danger-bg: rgba(239, 68, 68, 0.2);
+      --dock-bg: rgba(39, 30, 26, 0.96);
+      --drawer-bg: #221a16;
+      --card-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+      --banner-bg: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(217, 119, 6, 0.08) 100%);
+      --switch-off: #4a3b34;
+      --cat-bar-bg: rgba(28, 21, 18, 0.92);
+    }
+
+    /* 3. GRIS OSCURO (Cinemático Kori Control) */
+    [data-theme="oscuro"] {
+      --bg: #09090b;
+      --bg-card: #12141a;
+      --bg-card-hover: #171b24;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(16, 185, 129, 0.4);
+      --matcha: #10b981;
+      --matcha-glow: rgba(16, 185, 129, 0.25);
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --danger: #ef4444;
+      --danger-bg: rgba(239, 68, 68, 0.15);
+      --dock-bg: rgba(13, 16, 23, 0.95);
+      --drawer-bg: #0f121a;
+      --card-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+      --banner-bg: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(99, 102, 241, 0.05) 100%);
+      --switch-off: #334155;
+      --cat-bar-bg: rgba(9, 9, 11, 0.92);
+    }
+
+    /* 4. AZUL PASTEL (Suave y fresco) */
+    [data-theme="azul"] {
+      --bg: #edf3f7;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f5f9fc;
+      --border: rgba(14, 116, 144, 0.12);
+      --border-focus: rgba(2, 132, 199, 0.5);
+      --matcha: #0284c7;
+      --matcha-glow: rgba(2, 132, 199, 0.25);
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --danger: #e11d48;
+      --danger-bg: rgba(225, 29, 72, 0.1);
+      --dock-bg: rgba(255, 255, 255, 0.95);
+      --drawer-bg: #f8fafc;
+      --card-shadow: 0 4px 18px rgba(15, 23, 42, 0.05);
+      --banner-bg: linear-gradient(135deg, rgba(2, 132, 199, 0.08) 0%, rgba(99, 102, 241, 0.06) 100%);
+      --switch-off: #cbd5e1;
+      --cat-bar-bg: rgba(237, 243, 247, 0.92);
+    }
+
+    :root {
+      --jp-font: 'Noto Sans JP', sans-serif;
+      --font: 'Outfit', sans-serif;
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding-bottom: 96px; /* Espacio para barra flotante de control */
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    /* =========================================================================
+       TOPBAR PERMANENTE KORI FILMS (SIEMPRE OSCURO, LOGO BLANCO ORIGINAL)
+       ========================================================================= */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: rgba(9, 9, 11, 0.95) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+      padding: 0.85rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .topbar-brand img {
+      height: 28px;
+      width: auto;
+      display: block;
+      filter: none !important;
+    }
+
+    .topbar-badge {
+      background: rgba(16, 185, 129, 0.15) !important;
+      border: 1px solid rgba(16, 185, 129, 0.35) !important;
+      color: #6ee7b7 !important;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      padding: 3px 8px;
+      border-radius: 99px;
+      text-transform: uppercase;
+    }
+
+    .topbar-demo-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.06) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      padding: 4px 10px;
+      border-radius: 99px;
+      font-size: 0.75rem;
+      color: #94a3b8 !important;
+    }
+
+    .demo-pulse {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    /* BARRITA FLOTANTE SUPERIOR DE CATEGORÍAS (APARECE AL SUPERAR LA SECCIÓN DE CATEGORÍAS) */
+    .cat-bar {
+      position: fixed;
+      top: 52px;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 8px 1.25rem;
+      background: var(--cat-bar-bg);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      scrollbar-width: none;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateY(-8px);
+      transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s, background 0.3s ease, border-color 0.3s ease;
+    }
+
+    .cat-bar.is-visible {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 600px) {
+      .cat-bar {
+        justify-content: flex-start;
+      }
+    }
+
+    .cat-bar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .cat-chip {
+      white-space: nowrap;
+      padding: 6px 14px;
+      border-radius: 99px;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      font-weight: 600;
+      background: var(--bg-card);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+
+    .cat-chip:hover {
+      border-color: var(--matcha);
+      color: var(--text);
+    }
+
+    .cat-chip.active {
+      background: var(--text);
+      color: var(--bg);
+      border-color: var(--text);
+      font-weight: 700;
+    }
+
+    /* Contenedor principal */
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 1.5rem 1.25rem;
+    }
+
+    /* =========================================================================
+       PERFIL DEL RESTAURANTE (LOGO, NOMBRE Y DESCRIPCIÓN)
+       ========================================================================= */
+    .restaurant-profile {
+      text-align: center;
+      padding: 1rem 0 1.6rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .restaurant-logo-badge {
+      width: 68px;
+      height: 68px;
+      border-radius: 18px;
+      background: #09090b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      margin-bottom: 0.75rem;
+      overflow: hidden;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      cursor: pointer;
+    }
+
+    .restaurant-logo-badge:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+    }
+
+    .restaurant-logo-badge img {
+      width: 44px;
+      height: auto;
+      object-fit: contain;
+      display: block;
+    }
+
+    .restaurant-name {
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      margin: 0 0 0.35rem;
+      transition: color 0.3s ease;
+    }
+
+    .restaurant-desc {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      max-width: 460px;
+      margin: 0 auto;
+      line-height: 1.45;
+      transition: color 0.3s ease;
+    }
+
+    /* =========================================================================
+       FICHA INTERACTIVA DE SIMULACIÓN EN VIVO
+       ========================================================================= */
+    .demo-ficha-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.15rem 1.3rem;
+      margin: 0 auto 2.5rem;
+      box-shadow: var(--card-shadow);
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+
+    .demo-ficha-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding-bottom: 0.85rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 0.9rem;
+    }
+
+    .demo-ficha-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .demo-ficha-badge {
+      background: var(--matcha);
+      color: #ffffff;
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px var(--matcha-glow);
+    }
+
+    .demo-ficha-title {
+      font-size: 0.92rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text);
+    }
+
+    .demo-ficha-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 10px;
+      margin-bottom: 0.9rem;
+    }
+
+    .demo-ficha-item {
+      background: var(--banner-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.75rem 0.85rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.82rem;
+      line-height: 1.4;
+      color: var(--text);
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+
+    .demo-ficha-icon {
+      font-size: 1.15rem;
+      line-height: 1;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .demo-ficha-item strong {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .demo-ficha-item span {
+      color: var(--text-muted);
+      font-size: 0.77rem;
+    }
+
+    .demo-ficha-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding-top: 0.55rem;
+    }
+
+    .demo-ficha-note {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-quick-open {
+      background: var(--matcha);
+      color: #ffffff;
+      border: none;
+      padding: 0.52rem 1.05rem;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.82rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+      box-shadow: 0 2px 10px var(--matcha-glow);
+    }
+
+    .btn-quick-open:hover {
+      box-shadow: 0 4px 18px var(--matcha-glow);
+      transform: translateY(-1px);
+      filter: brightness(1.08);
+    }
+
+    /* =========================================================================
+       SECCIÓN RECOMENDADOS (IDÉNTICO A TENCHA: UN SOLO PRODUCTO CENTRADO Y DOTS)
+       ========================================================================= */
+    .hero-rec {
+      max-width: 440px;
+      margin: 0 auto 3rem;
+      padding: 0 4px;
+    }
+
+    .rec-title-header {
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+      color: var(--text);
+      text-align: center;
+    }
+
+    .carousel-tencha-wrap {
+      position: relative;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--card-shadow);
+      background: #11141c;
+      border: 1px solid var(--border);
+    }
+
+    .carousel-tencha {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      scroll-behavior: smooth;
+    }
+
+    .carousel-tencha::-webkit-scrollbar {
+      display: none;
+    }
+
+    .slide-tencha {
+      flex: 0 0 100%;
+      scroll-snap-align: center;
+      position: relative;
+      aspect-ratio: 4 / 5;
+      cursor: pointer;
+      overflow: hidden;
+    }
+
+    .slide-tencha-media {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.4s ease;
+    }
+
+    .slide-tencha-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      pointer-events: none;
+    }
+
+    .slide-tencha-video.playing {
+      opacity: 1;
+    }
+
+    .slide-tencha.is-agotado .slide-tencha-video {
+      filter: grayscale(100%) brightness(0.65);
+    }
+
+    .slide-tencha:hover .slide-tencha-media,
+    .slide-tencha:hover .slide-tencha-video {
+      transform: scale(1.03);
+    }
+
+    /* Texto sobre la foto idéntico a Tencha */
+    .overlay-top-tencha {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 3;
+      padding: 24px 22px 70px;
+      background: linear-gradient(180deg, rgba(16, 14, 12, 0.75) 0%, rgba(16, 14, 12, 0.3) 60%, transparent 100%);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .overlay-top-name {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.2;
+    }
+
+    .overlay-top-sub {
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.85);
+      margin-top: 2px;
+    }
+
+    .overlay-top-jp {
+      font-family: var(--jp-font);
+      font-size: 0.78rem;
+      color: #a7f3d0;
+      letter-spacing: 0.05em;
+    }
+
+    .overlay-price-tencha {
+      position: absolute;
+      left: 20px;
+      bottom: 20px;
+      z-index: 3;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #ffffff;
+      padding: 5px 14px;
+      border-radius: 99px;
+      background: rgba(18, 16, 14, 0.65);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Puntitos inferiores con animación */
+    .dots-tencha {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .dot-tencha {
+      width: 6px;
+      height: 6px;
+      border-radius: 99px;
+      background: rgba(125, 125, 125, 0.35);
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .dot-tencha.active {
+      width: 24px;
+      background: var(--matcha);
+    }
+
+    /* Agotado en slide Tencha */
+    .slide-tencha.is-agotado .slide-tencha-media {
+      filter: grayscale(100%) brightness(0.65);
+    }
+
+    .badge-agotado-slide {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      z-index: 3;
+      transform: translate(-50%, -50%);
+      padding: 8px 18px;
+      border-radius: 99px;
+      background: rgba(220, 38, 38, 0.9);
+      backdrop-filter: blur(8px);
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      box-shadow: 0 4px 20px rgba(220, 38, 38, 0.5);
+    }
+
+    .rec-empty {
+      background: var(--bg-card);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 2rem 1.5rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+    }
+
+    /* =========================================================================
+       TIRITAS HORIZONTALES DE CATEGORÍAS (IDÉNTICO A TENCHA)
+       ========================================================================= */
+    .cat-teasers-wrap {
+      margin-bottom: 3.5rem;
+    }
+
+    .cat-teasers-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+
+    .cat-teasers-sub {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .cat-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .cat-card-teaser {
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 24px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      box-shadow: var(--card-shadow);
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+      min-height: 84px;
+    }
+
+    .cat-card-teaser:hover {
+      transform: scale(1.012);
+      border-color: var(--matcha);
+    }
+
+    .cat-card-info {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .cat-card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cat-card-sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .cat-card-media {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 65%;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .cat-card-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: right center;
+    }
+
+    .cat-card-media::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, var(--bg-card) 0%, var(--bg-card) 20%, rgba(20, 18, 16, 0.5) 60%, rgba(20, 18, 16, 0.1) 100%);
+    }
+
+    /* =========================================================================
+       CATÁLOGO DE PRODUCTOS (MODO MINIMALISTA VS MODO DETALLADO)
+       ========================================================================= */
+    .catalog-section {
+      margin-bottom: 2rem;
+    }
+
+    .category-group {
+      margin-bottom: 3rem;
+      scroll-margin-top: 110px;
+    }
+
+    .category-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.65rem;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .category-count {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: normal;
+    }
+
+    /* FORMATO 1: MODO MINIMALISTA (FOTO COMPLETA 4:5 CON DETALLES MÍNIMOS) */
+    .products-grid-visual {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    @media (min-width: 640px) {
+      .products-grid-visual {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 16px;
+      }
+    }
+
+    .tencha-card {
+      position: relative;
+      overflow: hidden;
+      aspect-ratio: 4 / 5;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      background: #151820;
+      box-shadow: var(--card-shadow);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+      user-select: none;
+    }
+
+    .tencha-card:hover {
+      transform: translateY(-3px) scale(1.015);
+      border-color: rgba(125, 125, 125, 0.35);
+    }
+
+    .tencha-card-media {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.35s ease;
+    }
+
+    .tencha-card:hover .tencha-card-media {
+      transform: scale(1.04);
+    }
+
+    /* Video preview en tarjeta (Scroll / Viewport Focus inteligente de Tencha) */
+    .card-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      opacity: 0;
+      transition: opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .card-video.playing {
+      opacity: 1;
+    }
+
+    .tencha-card.is-agotado .card-video {
+      filter: grayscale(100%) brightness(0.65);
+    }
+
+    .tencha-overlay-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 3;
+      padding: 14px 14px 44px;
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.35) 55%, transparent 100%);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .tencha-card-name {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.25;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+    }
+
+    .tencha-card-sub {
+      font-size: 0.74rem;
+      color: rgba(255, 255, 255, 0.85);
+      line-height: 1.3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+    }
+
+    .tencha-card-jp {
+      font-family: var(--jp-font);
+      font-size: 0.72rem;
+      color: #a7f3d0;
+      font-weight: 500;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+    }
+
+    .tencha-overlay-bottom {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      right: 12px;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .tencha-price-pill {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #ffffff;
+      padding: 4px 10px;
+      border-radius: 99px;
+      background: rgba(18, 16, 14, 0.65);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .tencha-temp-pill {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 99px;
+      background: rgba(18, 16, 14, 0.65);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .tencha-card.is-agotado .tencha-card-media {
+      filter: grayscale(100%) brightness(0.65);
+    }
+
+    .tencha-center-agotado {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      z-index: 3;
+      transform: translate(-50%, -50%);
+      padding: 6px 14px;
+      border-radius: 99px;
+      background: rgba(220, 38, 38, 0.88);
+      backdrop-filter: blur(8px);
+      color: #fff;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      box-shadow: 0 4px 15px rgba(220, 38, 38, 0.5);
+    }
+
+    /* FORMATO 2: MODO DETALLADO (FOTO AL LADO CON TEXTO Y DESCRIPCIÓN) */
+    .products-grid-detailed {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 1rem;
+    }
+
+    .menu-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      display: flex;
+      gap: 1rem;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: var(--card-shadow);
+    }
+
+    .menu-card:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(125, 125, 125, 0.25);
+      transform: translateY(-2px);
+    }
+
+    .menu-card.is-agotado {
+      opacity: 0.65;
+    }
+
+    .menu-thumb-wrap {
+      width: 86px;
+      height: 108px;
+      border-radius: 10px;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: #000;
+      position: relative;
+    }
+
+    .menu-thumb-wrap .card-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.55s ease;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .menu-thumb-wrap .card-video.playing {
+      opacity: 1;
+    }
+
+    .menu-thumb {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .menu-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-width: 0;
+    }
+
+    .menu-header-row {
+      margin-bottom: 4px;
+    }
+
+    .menu-jp {
+      font-family: var(--jp-font);
+      font-size: 0.72rem;
+      color: var(--matcha);
+      display: block;
+      margin-bottom: 2px;
+      font-weight: 500;
+    }
+
+    .menu-name {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.25;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .menu-sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.35;
+      margin-top: 2px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .menu-tags {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .tag-chip {
+      font-size: 0.68rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(125, 125, 125, 0.08);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .tag-chip.vegano {
+      color: var(--matcha);
+      background: rgba(16, 185, 129, 0.12);
+      border-color: rgba(16, 185, 129, 0.25);
+    }
+
+    .menu-footer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 8px;
+      padding-top: 6px;
+      border-top: 1px solid var(--border);
+    }
+
+    .menu-price {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--matcha);
+    }
+
+    .badge-agotado-inline {
+      background: var(--danger-bg);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      color: var(--danger);
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* BARRA FLOTANTE FIJA INFERIOR — BOTÓN PANEL DE CONTROL */
+    .control-dock {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 60;
+      background: var(--dock-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border);
+      padding: 0.85rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.1);
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+
+    .btn-toggle-panel {
+      background: linear-gradient(135deg, var(--matcha) 0%, #059669 100%);
+      color: #ffffff;
+      border: none;
+      padding: 0.72rem 1.65rem;
+      border-radius: 99px;
+      cursor: pointer;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      box-shadow: 0 4px 20px var(--matcha-glow);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      text-align: center;
+    }
+
+    .btn-toggle-panel .btn-panel-main {
+      font-size: 0.95rem;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      line-height: 1.2;
+    }
+
+    .btn-toggle-panel .btn-panel-sub {
+      font-size: 0.74rem;
+      font-weight: 500;
+      opacity: 0.92;
+      letter-spacing: 0.01em;
+      line-height: 1.2;
+    }
+
+    .btn-toggle-panel:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 28px var(--matcha-glow);
+      filter: brightness(1.06);
+    }
+
+    .btn-toggle-panel:active {
+      transform: translateY(0);
+    }
+
+    /* MODAL / DRAWER DEL PANEL DE CONTROL */
+    .panel-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      z-index: 90;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .panel-backdrop.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .control-drawer {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      left: 0;
+      max-height: 85vh;
+      background: var(--drawer-bg);
+      border-top: 1px solid var(--border);
+      border-radius: 24px 24px 0 0;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      transform: translateY(100%);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease;
+      box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.35);
+    }
+
+    @media (min-width: 840px) {
+      .control-drawer {
+        top: 0;
+        bottom: 0;
+        left: auto;
+        right: 0;
+        width: 520px;
+        max-height: 100vh;
+        border-top: none;
+        border-left: 1px solid var(--border);
+        border-radius: 0;
+        transform: translateX(100%);
+      }
+    }
+
+    .control-drawer.active {
+      transform: translate(0, 0);
+    }
+
+    .drawer-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-card);
+      flex-shrink: 0;
+    }
+
+    .drawer-title-col {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .drawer-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .drawer-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .drawer-close-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(125, 125, 125, 0.1);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .drawer-close-btn:hover {
+      background: rgba(125, 125, 125, 0.2);
+      color: var(--text);
+    }
+
+    .drawer-body {
+      padding: 1.25rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* SELECTOR DE FORMATO DE TARJETA (SWITCH) */
+    .layout-picker-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      box-shadow: var(--card-shadow);
+    }
+
+    .layout-picker-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .layout-switch-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.65rem;
+    }
+
+    .layout-choice-btn {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 0.75rem 0.85rem;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+      cursor: pointer;
+      color: var(--text);
+      font-family: inherit;
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+
+    .layout-choice-btn:hover {
+      border-color: var(--matcha);
+      transform: translateY(-1px);
+    }
+
+    .layout-choice-btn.active {
+      border-color: var(--matcha);
+      background: rgba(16, 185, 129, 0.1);
+      box-shadow: 0 0 12px var(--matcha-glow);
+    }
+
+    .layout-choice-head {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.84rem;
+      font-weight: 700;
+    }
+
+    .layout-choice-desc {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      line-height: 1.25;
+    }
+
+    /* SELECTOR DE TEMAS / COLOR DE LA CARTA */
+    .theme-picker-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      box-shadow: var(--card-shadow);
+    }
+
+    .theme-picker-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .theme-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.5rem;
+    }
+
+    .theme-btn {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 0.65rem 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+
+    .theme-btn:hover {
+      border-color: var(--matcha);
+      transform: translateY(-1px);
+    }
+
+    .theme-btn.active {
+      border-color: var(--matcha);
+      background: rgba(16, 185, 129, 0.1);
+      box-shadow: 0 0 12px var(--matcha-glow);
+    }
+
+    .theme-swatch {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+
+    /* Alerta de sesión temporal */
+    .drawer-temp-alert {
+      background: var(--banner-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.85rem 1rem;
+      font-size: 0.8rem;
+      color: var(--text);
+      line-height: 1.4;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      opacity: 0.95;
+    }
+
+    /* Tarjeta de control de producto en el drawer */
+    .drawer-prod-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      box-shadow: var(--card-shadow);
+      transition: border-color 0.2s ease;
+    }
+
+    .drawer-prod-card:hover {
+      border-color: rgba(125, 125, 125, 0.3);
+    }
+
+    .drawer-prod-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .drawer-prod-thumb {
+      width: 48px;
+      height: 60px;
+      border-radius: 8px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: #000;
+    }
+
+    .drawer-prod-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .drawer-prod-name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .drawer-prod-cat {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    /* Fila de controles interactivos */
+    .control-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.4rem 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .control-label {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Switch iOS toggle */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background-color: var(--switch-off);
+      transition: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    input:checked + .slider {
+      background-color: var(--matcha);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+
+    /* Control de precio */
+    .price-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .price-currency {
+      color: var(--matcha);
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .price-input {
+      width: 95px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 5px 8px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text);
+      text-align: right;
+      transition: border-color 0.2s ease;
+    }
+
+    .price-input:focus {
+      outline: none;
+      border-color: var(--matcha);
+    }
+
+    /* Botón Asignar a Recomendados */
+    .btn-rec-toggle {
+      width: 100%;
+      padding: 0.6rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border: 1px solid var(--border);
+    }
+
+    .btn-rec-toggle.active {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.4);
+      color: var(--matcha);
+    }
+
+    .btn-rec-toggle.inactive {
+      background: var(--bg);
+      color: var(--text-muted);
+    }
+
+    .btn-rec-toggle:hover {
+      filter: brightness(1.1);
+    }
+
+    /* Footer del drawer con botón de reset */
+    .drawer-footer {
+      padding: 1rem 1.25rem;
+      border-top: 1px solid var(--border);
+      background: var(--bg-card);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-shrink: 0;
+    }
+
+    .btn-reset-demo {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.55rem 0.95rem;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-reset-demo:hover {
+      border-color: var(--matcha);
+    }
+
+    /* POPUP DE PRODUCTO (Al hacer clic en cualquier producto o slide) */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 80;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.25s ease;
+    }
+
+    .modal-backdrop.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      width: 100%;
+      max-width: 420px;
+      overflow: hidden;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+      position: relative;
+      transform: scale(0.95);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .modal-backdrop.active .modal-card {
+      transform: scale(1);
+    }
+
+    .modal-media-wrap {
+      width: 100%;
+      aspect-ratio: 4/5;
+      background: #000;
+      position: relative;
+    }
+
+    .modal-video, .modal-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .modal-close-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10;
+      transition: all 0.2s ease;
+    }
+
+    .modal-close-btn:hover {
+      background: rgba(0, 0, 0, 0.8);
+      transform: scale(1.08);
+    }
+
+    .modal-body {
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .modal-jp {
+      font-family: var(--jp-font);
+      font-size: 0.8rem;
+      color: var(--matcha);
+      font-weight: 600;
+    }
+
+    .modal-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .modal-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    .modal-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 8px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+
+    .modal-price {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--matcha);
+    }
+  </style>
+</head>
+<body data-theme="oscuro">
+
+  <!-- Topbar PERMANENTE DE KORI FILMS (SIEMPRE OSCURO, LOGO BLANCO ORIGINAL) -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <img src="assets/kori-mark.png" alt="Kori Films">
+      <span class="topbar-badge">CARTA DEMO</span>
+    </div>
+    <div class="topbar-demo-pill">
+      <span class="demo-pulse"></span>
+      <span>Simulador en Vivo</span>
+    </div>
+  </header>
+
+  <!-- BARRITA STICKY DE CATEGORÍAS (IDÉNTICO A TENCHA) -->
+  <nav class="cat-bar" id="stickyCatBar" aria-label="Navegación de categorías">
+    <a href="#cat-mezclas" class="cat-chip active" data-cat="Creaciones de Matcha" onclick="scrollToCategory(event, 'cat-mezclas')">Creaciones de Matcha</a>
+    <a href="#cat-cafe" class="cat-chip" data-cat="Café de Especialidad" onclick="scrollToCategory(event, 'cat-cafe')">Café de Especialidad</a>
+    <a href="#cat-sandos" class="cat-chip" data-cat="Sandos & Cocina" onclick="scrollToCategory(event, 'cat-sandos')">Sandos & Cocina</a>
+  </nav>
+
+  <main class="container">
+    <!-- PERFIL DEL RESTAURANTE (LOGO, NOMBRE Y DESCRIPCIÓN) -->
+    <header class="restaurant-profile">
+      <div class="restaurant-logo-badge" onclick="openControlDrawer()" title="Logo del restaurante / Clic para abrir panel">
+        <img src="assets/kori-mark.png" alt="Kori Films">
+      </div>
+      <h1 class="restaurant-name">Kori Films</h1>
+      <p class="restaurant-desc">Cafetería de Especialidad & Cocina Demo · Experiencia visual en carta digital interactiva</p>
+    </header>
+
+    <!-- FICHA INTERACTIVA DE SIMULACIÓN EN VIVO -->
+    <div class="demo-ficha-card">
+      <div class="demo-ficha-header">
+        <div class="demo-ficha-title-wrap">
+          <span class="demo-ficha-title">Carta Digital Simulada</span>
+        </div>
+        <button class="btn-quick-open" onclick="openControlDrawer()" title="Abrir panel de personalización">
+          <span>⚡ Abrir Panel de Control</span>
+        </button>
+      </div>
+
+      <div class="demo-ficha-grid">
+        <div class="demo-ficha-item">
+          <span class="demo-ficha-icon">🎨</span>
+          <div>
+            <strong>Paletas de Color</strong>
+            <span>Cambia entre Beige, Marrón T, Gris Oscuro y Azul Pastel en tiempo real.</span>
+          </div>
+        </div>
+
+        <div class="demo-ficha-item">
+          <span class="demo-ficha-icon">📱</span>
+          <div>
+            <strong>Modo de Visualización</strong>
+            <span>Alterna entre Modo Minimalista (estilo Tencha 4:5) y Modo Detallado.</span>
+          </div>
+        </div>
+
+        <div class="demo-ficha-item">
+          <span class="demo-ficha-icon">⚡</span>
+          <div>
+            <strong>Disponibilidad & Stock</strong>
+            <span>Pausa productos o márcalos como "Agotado" con distintivos al instante.</span>
+          </div>
+        </div>
+
+        <div class="demo-ficha-item">
+          <span class="demo-ficha-icon">🏷️</span>
+          <div>
+            <strong>Precios & Recomendados</strong>
+            <span>Edita valores al vuelo y rota los productos destacados en el carrusel superior.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-ficha-footer">
+        <span class="demo-ficha-note">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          Simulación en memoria: tus cambios se reflejan al instante y se restauran al recargar la página.
+        </span>
+      </div>
+    </div>
+
+    <!-- SECCIÓN RECOMENDADOS (IDÉNTICO A TENCHA: UN SOLO PRODUCTO CENTRADO Y DOTS) -->
+    <section class="hero-rec" id="recSection" aria-label="Productos Recomendados">
+      <h2 class="rec-title-header">Recomendados</h2>
+      
+      <div class="carousel-tencha-wrap">
+        <div class="carousel-tencha" id="carousel">
+          <!-- Renderizado dinámico de slides centrados -->
+        </div>
+      </div>
+
+      <!-- Puntitos inferiores -->
+      <div class="dots-tencha" id="carouselDots">
+        <!-- Generados dinámicamente -->
+      </div>
+    </section>
+
+    <!-- SECCIÓN DE CATEGORÍAS (TIRITAS HORIZONTALES CON IMAGEN IDÉNTICO A TENCHA) -->
+    <section class="cat-teasers-wrap" id="catTeasersSection">
+      <h2 class="cat-teasers-title">Nuestra Carta</h2>
+      <p class="cat-teasers-sub">Elige una categoría</p>
+
+      <div class="cat-grid" id="catGridTeasers">
+        <!-- Renderizado dinámico de las 3 tiritas de categoría -->
+      </div>
+    </section>
+
+    <!-- SECCIÓN CATÁLOGO DETALLADO DE PRODUCTOS -->
+    <section class="catalog-section" id="catalogSection">
+      <div id="catalogCategories">
+        <!-- Renderizado dinámico de categorías y productos según el formato elegido -->
+      </div>
+    </section>
+  </main>
+
+  <!-- BARRA FIJA FLOTANTE INFERIOR -->
+  <div class="control-dock">
+    <button class="btn-toggle-panel" onclick="openControlDrawer()" aria-label="Abrir Panel de Control">
+      <span class="btn-panel-main">⚡ Abrir Panel de Control</span>
+      <span class="btn-panel-sub">Ve las configuraciones que puedes hacerle a tu carta</span>
+    </button>
+  </div>
+
+  <!-- BACKDROP & DRAWER DEL PANEL DE CONTROL -->
+  <div class="panel-backdrop" id="panelBackdrop" onclick="closeControlDrawer()"></div>
+
+  <aside class="control-drawer" id="controlDrawer" aria-label="Panel de Control Demo">
+    <div class="drawer-header">
+      <div class="drawer-title-col">
+        <h3 class="drawer-title">⚡ Kori Films Control</h3>
+        <span class="drawer-sub">Simulador de gestión en tiempo real</span>
+      </div>
+      <button class="drawer-close-btn" onclick="closeControlDrawer()" aria-label="Cerrar panel">✕</button>
+    </div>
+
+    <div class="drawer-body">
+      <!-- SELECTOR DE FORMATO / DISEÑO DE TARJETA -->
+      <div class="layout-picker-section">
+        <label class="layout-picker-title">📐 Formato de Presentación del Producto</label>
+        <div class="layout-switch-grid">
+          <button type="button" class="layout-choice-btn active" id="btnModeVisual" onclick="setLayoutMode('visual')">
+            <div class="layout-choice-head">
+              <span>🖼️</span>
+              <span>Modo Minimalista</span>
+            </div>
+            <span class="layout-choice-desc">Foto inmersiva 4:5 con detalles mínimos superpuestos</span>
+          </button>
+          <button type="button" class="layout-choice-btn" id="btnModeDetailed" onclick="setLayoutMode('detailed')">
+            <div class="layout-choice-head">
+              <span>📋</span>
+              <span>Modo Detallado</span>
+            </div>
+            <span class="layout-choice-desc">Foto al lado con texto, descripción y tags</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- SELECTOR DE PALETA DE COLOR -->
+      <div class="theme-picker-section">
+        <label class="theme-picker-title">🎨 Paleta de Color de la Carta</label>
+        <div class="theme-grid">
+          <button type="button" class="theme-btn" data-set-theme="beige" onclick="setTheme('beige')">
+            <span class="theme-swatch" style="background:#f6f1ea; border:1px solid #d8cfc4;"></span>
+            <span>Beige</span>
+          </button>
+          <button type="button" class="theme-btn" data-set-theme="marron" onclick="setTheme('marron')">
+            <span class="theme-swatch" style="background:#1c1512; border:1px solid #4a3830;"></span>
+            <span>Marrón T</span>
+          </button>
+          <button type="button" class="theme-btn active" data-set-theme="oscuro" onclick="setTheme('oscuro')">
+            <span class="theme-swatch" style="background:#09090b; border:1px solid #27272a;"></span>
+            <span>Gris Oscuro</span>
+          </button>
+          <button type="button" class="theme-btn" data-set-theme="azul" onclick="setTheme('azul')">
+            <span class="theme-swatch" style="background:#edf3f7; border:1px solid #cbd5e1;"></span>
+            <span>Azul Pastel</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Nota de memoria temporal -->
+      <div class="drawer-temp-alert">
+        <span>💡</span>
+        <div>
+          <strong>Modo Demostración en Memoria:</strong> Todos los cambios se reflejan al instante. Al refrescar o salir de la página, todo se restablece automáticamente.
+        </div>
+      </div>
+
+      <!-- Lista de controles para los 6 productos -->
+      <div id="drawerProductControls" style="display:flex;flex-direction:column;gap:1rem;">
+        <!-- Renderizado dinámico -->
+      </div>
+    </div>
+
+    <div class="drawer-footer">
+      <button class="btn-reset-demo" onclick="resetDemoState()">
+        <span>↺ Restablecer valores</span>
+      </button>
+      <span style="font-size:0.75rem;color:var(--text-muted);">6 productos en memoria</span>
+    </div>
+  </aside>
+
+  <!-- MODAL / POPUP DE PRODUCTO INTERACTIVO -->
+  <div class="modal-backdrop" id="productModalBackdrop" onclick="closeProductModal(event)">
+    <div class="modal-card" id="productModalCard">
+      <div class="modal-media-wrap">
+        <button class="modal-close-btn" onclick="closeProductModal()">✕</button>
+        <video id="modalVideo" class="modal-video" autoplay loop muted playsinline style="display:none;"></video>
+        <img id="modalImg" class="modal-img" alt="" style="display:none;">
+      </div>
+      <div class="modal-body">
+        <span class="modal-jp" id="modalJp"></span>
+        <h3 class="modal-title" id="modalTitle"></h3>
+        <p class="modal-desc" id="modalDesc"></p>
+        <div class="modal-footer">
+          <span class="modal-price" id="modalPrice"></span>
+          <span id="modalAgotadoBadge" class="badge-agotado-float" style="display:none;">Agotado</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // DATOS DE LOS 6 PRODUCTOS REALES (EN MEMORIA)
+    // =========================================================================
+    const INITIAL_PRODUCTS = [
+      {
+        id: 1,
+        nombre: 'Yuzu Coco',
+        jp: '柚子',
+        sub: 'Matcha ceremonial, leche de coco cremosa y un toque cítrico de yuzu japonés.',
+        categoria: 'Creaciones de Matcha',
+        catKey: 'cat-mezclas',
+        precio: 5500,
+        temperatura: 'ambos',
+        tags: ['frio', 'caliente', 'vegano'],
+        foto: 'https://tenchamatcheria.com/productos/02-creaciones-de-matcha/01-yuzu-coco/foto.webp',
+        video: 'https://tenchamatcheria.com/productos/02-creaciones-de-matcha/01-yuzu-coco/animacion.mp4',
+        disponible: true,
+        agotado: false,
+        recomendado: true
+      },
+      {
+        id: 2,
+        nombre: 'Ube Matcha Latte',
+        jp: '紅芋',
+        sub: 'Doble capa visual: tubérculo dulce de ube con notas avainilladas y matcha ceremonial.',
+        categoria: 'Creaciones de Matcha',
+        catKey: 'cat-mezclas',
+        precio: 5200,
+        temperatura: 'ambos',
+        tags: ['frio', 'caliente'],
+        foto: 'https://tenchamatcheria.com/productos/02-creaciones-de-matcha/03-ube-matcha-latte/foto.webp',
+        video: 'https://tenchamatcheria.com/productos/02-creaciones-de-matcha/03-ube-matcha-latte/animacion.mp4',
+        disponible: true,
+        agotado: false,
+        recomendado: false
+      },
+      {
+        id: 3,
+        nombre: 'Moka',
+        jp: 'モカ',
+        sub: 'Café de especialidad con doble extracción de espresso, chocolate artesanal y leche.',
+        categoria: 'Café de Especialidad',
+        catKey: 'cat-cafe',
+        precio: 4900,
+        temperatura: 'ambos',
+        tags: ['frio', 'caliente'],
+        foto: 'https://tenchamatcheria.com/productos/03-cafe-de-especialidad/05-moka/foto.webp',
+        video: 'https://tenchamatcheria.com/productos/03-cafe-de-especialidad/05-moka/animacion.mp4',
+        disponible: true,
+        agotado: false,
+        recomendado: false
+      },
+      {
+        id: 4,
+        nombre: 'Cold Brew',
+        jp: '水出し珈琲',
+        sub: 'Café de especialidad infusionado en frío lentamente por 16 horas para máxima suavidad.',
+        categoria: 'Café de Especialidad',
+        catKey: 'cat-cafe',
+        precio: 3200,
+        temperatura: 'frio',
+        tags: ['frio'],
+        foto: 'https://tenchamatcheria.com/productos/03-cafe-de-especialidad/06-cold-brew/foto.webp',
+        video: 'https://tenchamatcheria.com/productos/03-cafe-de-especialidad/06-cold-brew/animacion.mp4',
+        disponible: true,
+        agotado: false,
+        recomendado: true
+      },
+      {
+        id: 5,
+        nombre: 'Pulled Pork Sando',
+        jp: '豚肉サンド',
+        sub: 'Pan de leche japonés shokupan, carne de cerdo deshilachada a cocción lenta y coleslaw.',
+        categoria: 'Sandos & Cocina',
+        catKey: 'cat-sandos',
+        precio: 8900,
+        temperatura: '',
+        tags: [],
+        foto: 'https://tenchamatcheria.com/productos/05-sandos/02-pulled-pork/foto.webp',
+        video: 'https://tenchamatcheria.com/productos/05-sandos/02-pulled-pork/animacion.mp4',
+        disponible: true,
+        agotado: false,
+        recomendado: true
+      },
+      {
+        id: 6,
+        nombre: 'Pan de Queso',
+        jp: 'チーズパン',
+        sub: 'Pan artesanal horneado al momento con selecta mezcla de quesos fundidos dorados.',
+        categoria: 'Sandos & Cocina',
+        catKey: 'cat-sandos',
+        precio: 4500,
+        temperatura: 'caliente',
+        tags: ['caliente'],
+        foto: 'https://tenchamatcheria.com/productos/05-sandos/04-pan-de-queso/foto.webp',
+        video: 'https://tenchamatcheria.com/productos/05-sandos/04-pan-de-queso/animacion.mp4',
+        disponible: true,
+        agotado: false,
+        recomendado: false
+      }
+    ];
+
+    // Definición de las 3 categorías existentes
+    const CATEGORIES_METADATA = [
+      {
+        id: 'cat-mezclas',
+        name: 'Creaciones de Matcha',
+        jp: '抹茶クリエーション',
+        sub: 'Bebidas innovadoras a base de matcha ceremonial',
+        coverImg: 'https://tenchamatcheria.com/productos/02-creaciones-de-matcha/01-yuzu-coco/foto.webp'
+      },
+      {
+        id: 'cat-cafe',
+        name: 'Café de Especialidad',
+        jp: 'スペシャルティコーヒー',
+        sub: 'Granos de origen seleccionados y tostados con maestría',
+        coverImg: 'https://tenchamatcheria.com/productos/03-cafe-de-especialidad/05-moka/foto.webp'
+      },
+      {
+        id: 'cat-sandos',
+        name: 'Sandos & Cocina',
+        jp: 'サンドイッチと軽食',
+        sub: 'Sándwiches en pan de leche shokupan y comida reconfortante',
+        coverImg: 'https://tenchamatcheria.com/productos/05-sandos/02-pulled-pork/foto.webp'
+      }
+    ];
+
+    // Estado reactivo en memoria (se destruye al recargar o salir)
+    let state = JSON.parse(JSON.stringify(INITIAL_PRODUCTS));
+    let currentTheme = 'oscuro';
+    let currentLayout = 'visual'; // 'visual' (Modo Minimalista) o 'detailed' (Modo Detallado)
+    let carouselAutoTimer = null;
+    let currentSlideIndex = 0;
+
+    // Formateador de moneda en pesos chilenos
+    function fmt(val) {
+      return '$' + (Number(val) || 0).toLocaleString('es-CL');
+    }
+
+    // =========================================================================
+    // GESTIÓN DEL FORMATO / DISEÑO DE TARJETA
+    // =========================================================================
+    function setLayoutMode(mode) {
+      currentLayout = mode;
+      document.getElementById('btnModeVisual').classList.toggle('active', mode === 'visual');
+      document.getElementById('btnModeDetailed').classList.toggle('active', mode === 'detailed');
+      renderCatalog();
+    }
+
+    // =========================================================================
+    // GESTIÓN DE TEMAS / COLOR DE FONDO
+    // =========================================================================
+    function setTheme(themeName) {
+      currentTheme = themeName;
+      document.documentElement.setAttribute('data-theme', themeName);
+      document.body.setAttribute('data-theme', themeName);
+
+      document.querySelectorAll('[data-set-theme]').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-set-theme') === themeName);
+      });
+    }
+
+    // =========================================================================
+    // RENDERIZADO GENERAL
+    // =========================================================================
+    function renderMenu() {
+      renderCarousel();
+      renderCategoryTeasers();
+      renderCatalog();
+      renderDrawerControls();
+    }
+
+    // 1. Carrusel de Recomendados (Un solo producto centrado + dots + rotación automática)
+    function renderCarousel() {
+      const carouselEl = document.getElementById('carousel');
+      const dotsEl = document.getElementById('carouselDots');
+      const recs = state.filter(p => p.disponible && p.recomendado);
+
+      // Limpiar timer previo si existía
+      if (carouselAutoTimer) {
+        clearInterval(carouselAutoTimer);
+        carouselAutoTimer = null;
+      }
+
+      if (recs.length === 0) {
+        carouselEl.innerHTML = `
+          <div class="rec-empty" style="width:100%; aspect-ratio:4/5; display:flex; align-items:center; justify-content:center;">
+            <span>No hay productos destacados activos. Asigna alguno desde el Panel de Control.</span>
+          </div>
+        `;
+        dotsEl.innerHTML = '';
+        return;
+      }
+
+      // Renderizar slides 100% con foto base + video loop sincronizado (Idéntico a Tencha)
+      carouselEl.innerHTML = recs.map((prod, idx) => `
+        <div class="slide-tencha ${prod.agotado ? 'is-agotado' : ''}" data-index="${idx}" onclick="openProductModal(${prod.id})">
+          <img class="slide-tencha-media" src="${prod.foto}" alt="${prod.nombre}" loading="${idx === 0 ? 'eager' : 'lazy'}">
+          ${prod.video ? `
+            <video class="slide-tencha-video ${idx === 0 ? 'playing' : ''}" muted loop playsinline preload="${idx === 0 ? 'auto' : 'metadata'}" src="${prod.video}"></video>
+          ` : ''}
+          <div class="overlay-top-tencha">
+            <span class="overlay-top-name">${prod.nombre}</span>
+            <span class="overlay-top-sub">${prod.sub || ''}</span>
+            <span class="overlay-top-jp">${prod.jp || ''}</span>
+          </div>
+
+          <div class="overlay-price-tencha">${fmt(prod.precio)}</div>
+
+          ${prod.agotado ? '<div class="badge-agotado-slide">Agotado</div>' : ''}
+        </div>
+      `).join('');
+
+      // Renderizar puntitos
+      dotsEl.innerHTML = recs.map((_, idx) => `
+        <button class="dot-tencha ${idx === 0 ? 'active' : ''}" onclick="goToSlide(${idx})" aria-label="Slide ${idx + 1}"></button>
+      `).join('');
+
+      currentSlideIndex = 0;
+
+      // Reproducir video del primer slide
+      syncCarouselSlideVideos(0);
+
+      // Evento de scroll en carrusel para sincronizar los puntitos y videos activos
+      carouselEl.onscroll = () => {
+        const width = carouselEl.clientWidth;
+        if (width <= 0) return;
+        const newIndex = Math.round(carouselEl.scrollLeft / width);
+        if (newIndex !== currentSlideIndex && newIndex >= 0 && newIndex < recs.length) {
+          currentSlideIndex = newIndex;
+          updateDots(newIndex);
+          syncCarouselSlideVideos(newIndex);
+        }
+      };
+
+      // Iniciar rotación automática sincronizada a 4.2s (duración de la animación del video)
+      if (recs.length > 1) {
+        startCarouselAutoTimer(recs.length);
+      }
+    }
+
+    function syncCarouselSlideVideos(activeIndex) {
+      const carouselEl = document.getElementById('carousel');
+      if (!carouselEl) return;
+      const slides = carouselEl.querySelectorAll('.slide-tencha');
+      slides.forEach((slide, idx) => {
+        const v = slide.querySelector('.slide-tencha-video');
+        if (!v) return;
+        if (idx === activeIndex) {
+          const p = v.play();
+          if (p !== undefined) {
+            p.then(() => v.classList.add('playing')).catch(() => {});
+          }
+        } else {
+          v.classList.remove('playing');
+          if (!v.paused) v.pause();
+        }
+      });
+    }
+
+    function updateDots(index) {
+      const dots = document.querySelectorAll('.dot-tencha');
+      dots.forEach((d, idx) => {
+        d.classList.toggle('active', idx === index);
+      });
+    }
+
+    function goToSlide(index) {
+      const carouselEl = document.getElementById('carousel');
+      if (!carouselEl) return;
+      const width = carouselEl.clientWidth;
+      carouselEl.scrollTo({ left: width * index, behavior: 'smooth' });
+      currentSlideIndex = index;
+      updateDots(index);
+      syncCarouselSlideVideos(index);
+
+      // Reiniciar timer
+      const recsCount = state.filter(p => p.disponible && p.recomendado).length;
+      if (recsCount > 1) {
+        startCarouselAutoTimer(recsCount);
+      }
+    }
+
+    function startCarouselAutoTimer(count) {
+      if (carouselAutoTimer) clearInterval(carouselAutoTimer);
+      carouselAutoTimer = setInterval(() => {
+        const nextIndex = (currentSlideIndex + 1) % count;
+        goToSlide(nextIndex);
+      }, 4200);
+    }
+
+    // 2. Renderizado de las 3 tiritas de categoría (Idéntico a Tencha)
+    function renderCategoryTeasers() {
+      const container = document.getElementById('catGridTeasers');
+      
+      container.innerHTML = CATEGORIES_METADATA.map(cat => {
+        const catProds = state.filter(p => p.categoria === cat.name && p.disponible);
+        const count = catProds.length;
+        const cover = catProds.length > 0 ? catProds[0].foto : cat.coverImg;
+
+        return `
+          <a href="#${cat.id}" class="cat-card-teaser" onclick="scrollToCategory(event, '${cat.id}')">
+            <div class="cat-card-info">
+              <h3 class="cat-card-title">
+                ${cat.name}
+              </h3>
+              <span class="cat-card-sub">${cat.sub}</span>
+            </div>
+            <div class="cat-card-media">
+              <img src="${cover}" alt="${cat.name}" loading="lazy">
+            </div>
+          </a>
+        `;
+      }).join('');
+    }
+
+    // 3. Catálogo de productos según el formato elegido ('visual' vs 'detailed')
+    function renderCatalog() {
+      const container = document.getElementById('catalogCategories');
+      
+      // Agrupar por categoría
+      const categoriesMap = {};
+      CATEGORIES_METADATA.forEach(cat => {
+        categoriesMap[cat.name] = {
+          meta: cat,
+          products: state.filter(p => p.categoria === cat.name)
+        };
+      });
+
+      let html = '';
+      for (const [catName, { meta, products }] of Object.entries(categoriesMap)) {
+        const visibleProds = products.filter(p => p.disponible);
+        if (visibleProds.length === 0) continue;
+
+        if (currentLayout === 'visual') {
+          // FORMATO 1: MODO MINIMALISTA (Foto completa 4:5 con detalles mínimos superpuestos)
+          html += `
+            <div class="category-group" id="${meta.id}" data-category-name="${catName}">
+              <div class="category-title">
+                <span>${catName}</span>
+                <span class="category-count">(${visibleProds.length})</span>
+              </div>
+              <div class="products-grid-visual">
+                ${visibleProds.map(prod => {
+                  const hasCold = prod.tags.includes('frio') || prod.temperatura === 'frio' || prod.temperatura === 'ambos';
+                  const hasHot = prod.tags.includes('caliente') || prod.temperatura === 'caliente' || prod.temperatura === 'ambos';
+                  const isVegano = prod.tags.includes('vegano');
+
+                  return `
+                    <div class="tencha-card ${prod.agotado ? 'is-agotado' : ''}" data-has-video="${prod.video ? '1' : '0'}" data-prod-id="${prod.id}" onclick="openProductModal(${prod.id})">
+                      <img class="tencha-card-media" src="${prod.foto}" alt="${prod.nombre}" loading="lazy">
+                      
+                      <div class="tencha-overlay-top">
+                        <div class="tencha-card-name">${prod.nombre}</div>
+                        <div class="tencha-card-sub">${prod.sub || ''}</div>
+                        <div class="tencha-card-jp">${prod.jp || ''}</div>
+                      </div>
+
+                      <div class="tencha-overlay-bottom">
+                        <span class="tencha-price-pill">${fmt(prod.precio)}</span>
+                        <div class="tencha-temp-pill">
+                          ${hasCold ? '❄️' : ''}
+                          ${hasHot ? '🔥' : ''}
+                          ${isVegano ? '🌱' : ''}
+                        </div>
+                      </div>
+
+                      ${prod.agotado ? '<div class="tencha-center-agotado">Agotado</div>' : ''}
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          `;
+        } else {
+          // FORMATO 2: MODO DETALLADO (Foto al lado, descripción y tags)
+          html += `
+            <div class="category-group" id="${meta.id}" data-category-name="${catName}">
+              <div class="category-title">
+                <span>${catName}</span>
+                <span class="category-count">(${visibleProds.length})</span>
+              </div>
+              <div class="products-grid-detailed">
+                ${visibleProds.map(prod => `
+                  <div class="menu-card ${prod.agotado ? 'is-agotado' : ''}" data-has-video="${prod.video ? '1' : '0'}" data-prod-id="${prod.id}" onclick="openProductModal(${prod.id})">
+                    <div class="menu-thumb-wrap">
+                      <img class="menu-thumb" src="${prod.foto}" alt="${prod.nombre}" loading="lazy">
+                    </div>
+                    <div class="menu-content">
+                      <div class="menu-header-row">
+                        <span class="menu-jp">${prod.jp || ''}</span>
+                        <h4 class="menu-name">${prod.nombre}</h4>
+                        <p class="menu-sub">${prod.sub || ''}</p>
+                        <div class="menu-tags">
+                          ${prod.tags.includes('vegano') ? '<span class="tag-chip vegano">🌱 Vegano</span>' : ''}
+                          ${prod.tags.includes('frio') ? '<span class="tag-chip">❄️ Frío</span>' : ''}
+                          ${prod.tags.includes('caliente') ? '<span class="tag-chip">🔥 Caliente</span>' : ''}
+                        </div>
+                      </div>
+                      <div class="menu-footer-row">
+                        <span class="menu-price">${fmt(prod.precio)}</span>
+                        ${prod.agotado ? '<span class="badge-agotado-inline">Agotado</span>' : ''}
+                      </div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }
+      }
+
+      if (!html) {
+        html = `
+          <div class="rec-empty">
+            Todos los productos han sido apagados (visibilidad desactivada) en el Panel de Control. Activa alguno para volver a verlo.
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
+      initCategoryScrollSpy();
+      if (cardVideoController) cardVideoController.scheduleFocus();
+    }
+
+    // 4. Controles del Drawer del Panel de Control
+    function renderDrawerControls() {
+      const container = document.getElementById('drawerProductControls');
+      
+      container.innerHTML = state.map(prod => `
+        <div class="drawer-prod-card" id="ctrl-card-${prod.id}">
+          <div class="drawer-prod-head">
+            <img class="drawer-prod-thumb" src="${prod.foto}" alt="${prod.nombre}">
+            <div class="drawer-prod-info">
+              <h4 class="drawer-prod-name">${prod.nombre}</h4>
+              <span class="drawer-prod-cat">${prod.categoria} • ${prod.jp}</span>
+            </div>
+          </div>
+
+          <!-- Switch 1: Visible en carta -->
+          <div class="control-row">
+            <span class="control-label">
+              <span style="color:${prod.disponible ? '#10b981' : '#64748b'};">●</span> Visible en carta
+            </span>
+            <label class="switch">
+              <input type="checkbox" ${prod.disponible ? 'checked' : ''} onchange="toggleDisponibilidad(${prod.id}, this.checked)">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <!-- Switch 2: En stock / Agotado -->
+          <div class="control-row">
+            <span class="control-label">
+              <span style="color:${!prod.agotado ? '#10b981' : '#ef4444'};">●</span> En stock (Disponible)
+            </span>
+            <label class="switch">
+              <input type="checkbox" ${!prod.agotado ? 'checked' : ''} onchange="toggleAgotado(${prod.id}, !this.checked)">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <!-- Input 3: Precio -->
+          <div class="control-row">
+            <span class="control-label">Precio carta</span>
+            <div class="price-input-wrap">
+              <span class="price-currency">$</span>
+              <input type="number" class="price-input" value="${prod.precio}" step="100" min="500" onchange="updatePrecio(${prod.id}, this.value)">
+            </div>
+          </div>
+
+          <!-- Botón 4: Asignar a Recomendados -->
+          <button class="btn-rec-toggle ${prod.recomendado ? 'active' : 'inactive'}" onclick="toggleRecomendado(${prod.id})">
+            ${prod.recomendado ? '★ En Recomendados (Quitar)' : '☆ Asignar a Recomendados'}
+          </button>
+        </div>
+      `).join('');
+    }
+
+    // =========================================================================
+    // NAVEGACIÓN Y SCROLL SPY DE CATEGORÍAS
+    // =========================================================================
+    function scrollToCategory(e, catId) {
+      if (e) e.preventDefault();
+      const el = document.getElementById(catId);
+      if (!el) return;
+      const navOffset = 110;
+      const elPos = el.getBoundingClientRect().top + window.pageYOffset;
+      window.scrollTo({
+        top: elPos - navOffset,
+        behavior: 'smooth'
+      });
+    }
+
+    function updateCategoryNavState() {
+      const catSection = document.getElementById('catTeasersSection');
+      const bar = document.getElementById('stickyCatBar');
+      if (!bar) return;
+
+      // 1. Visibilidad de la barra: se muestra únicamente cuando el usuario supera la sección de categorías
+      if (catSection) {
+        const rect = catSection.getBoundingClientRect();
+        // Cuando el final de la sección de categorías sube y pasa por detrás de la barra (<= 60px)
+        const hasPassed = rect.bottom <= 60;
+        if (hasPassed) {
+          bar.classList.add('is-visible');
+        } else {
+          bar.classList.remove('is-visible');
+        }
+      }
+
+      // 2. Indicación de qué categoría está activa
+      const groups = document.querySelectorAll('.category-group');
+      const chips = document.querySelectorAll('.cat-chip');
+      if (groups.length === 0 || chips.length === 0) return;
+
+      const navOffset = 140;
+      let activeCatName = null;
+
+      groups.forEach(group => {
+        const rect = group.getBoundingClientRect();
+        if (rect.top <= navOffset && rect.bottom > navOffset) {
+          activeCatName = group.getAttribute('data-category-name');
+        }
+      });
+
+      // Si ninguna está exactamente en el rango (por ejemplo scrolleó hasta abajo del todo)
+      if (!activeCatName) {
+        groups.forEach(g => {
+          if (g.getBoundingClientRect().top <= navOffset) {
+            activeCatName = g.getAttribute('data-category-name');
+          }
+        });
+      }
+
+      // Si está arriba de todas pero la barra se ve, activar la primera por defecto
+      if (!activeCatName && groups.length > 0) {
+        activeCatName = groups[0].getAttribute('data-category-name');
+      }
+
+      if (activeCatName) {
+        chips.forEach(chip => {
+          const isMatch = chip.getAttribute('data-cat') === activeCatName;
+          chip.classList.toggle('active', isMatch);
+          if (isMatch && bar.classList.contains('is-visible')) {
+            // Asegurar que el chip activo esté visible si hay scroll horizontal en móvil
+            chip.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+          }
+        });
+      }
+    }
+
+    let scrollSpyInitialized = false;
+    function initCategoryScrollSpy() {
+      if (!scrollSpyInitialized) {
+        window.addEventListener('scroll', updateCategoryNavState, { passive: true });
+        scrollSpyInitialized = true;
+      }
+      updateCategoryNavState();
+    }
+
+    // =========================================================================
+    // ACCIONES REACTIVAS DEL PANEL DE CONTROL
+    // =========================================================================
+    function toggleDisponibilidad(id, checked) {
+      const prod = state.find(p => p.id === id);
+      if (prod) {
+        prod.disponible = checked;
+        renderCarousel();
+        renderCategoryTeasers();
+        renderCatalog();
+      }
+    }
+
+    function toggleAgotado(id, isAgotado) {
+      const prod = state.find(p => p.id === id);
+      if (prod) {
+        prod.agotado = isAgotado;
+        renderCarousel();
+        renderCatalog();
+      }
+    }
+
+    function updatePrecio(id, newPrice) {
+      const prod = state.find(p => p.id === id);
+      const num = parseInt(newPrice, 10);
+      if (prod && !isNaN(num) && num > 0) {
+        prod.precio = num;
+        renderCarousel();
+        renderCatalog();
+      }
+    }
+
+    function toggleRecomendado(id) {
+      const prod = state.find(p => p.id === id);
+      if (prod) {
+        prod.recomendado = !prod.recomendado;
+        renderCarousel();
+        renderDrawerControls();
+      }
+    }
+
+    function resetDemoState() {
+      state = JSON.parse(JSON.stringify(INITIAL_PRODUCTS));
+      setTheme('oscuro');
+      setLayoutMode('visual');
+      renderMenu();
+    }
+
+    // =========================================================================
+    // GESTIÓN DEL DRAWER
+    // =========================================================================
+    function openControlDrawer() {
+      document.getElementById('panelBackdrop').classList.add('active');
+      document.getElementById('controlDrawer').classList.add('active');
+    }
+
+    function closeControlDrawer() {
+      document.getElementById('panelBackdrop').classList.remove('active');
+      document.getElementById('controlDrawer').classList.remove('active');
+    }
+
+    // =========================================================================
+    // PRECARGA Y REPRODUCCIÓN INTELIGENTE DE VIDEO (VIEWPORT FOCUS DE TENCHA)
+    // =========================================================================
+    let cardVideoController = null;
+    const preloadedMediaSet = new Set();
+
+    function preloadProductsMedia() {
+      state.forEach(prod => {
+        if (prod.foto && !preloadedMediaSet.has(prod.foto)) {
+          const img = new Image();
+          img.src = prod.foto;
+          preloadedMediaSet.add(prod.foto);
+        }
+        if (prod.video && !preloadedMediaSet.has(prod.video)) {
+          const link = document.createElement('link');
+          link.rel = 'preload';
+          link.as = 'video';
+          link.href = prod.video;
+          document.head.appendChild(link);
+          preloadedMediaSet.add(prod.video);
+        }
+      });
+    }
+
+    function initCardVideoFocus() {
+      let dwellTimer = null;
+      let activeCard = null;
+      let activeVideo = null;
+      let fadeOutTimer = null;
+
+      function getBandBounds() {
+        const vh = window.innerHeight;
+        // Banda activa superior-media: justo debajo de la barra sticky (~115px)
+        // hasta el 55% de la pantalla (el foco natural de lectura)
+        const bandTop = Math.max(115, vh * 0.15);
+        const bandBottom = vh * 0.55;
+        return { bandTop, bandBottom };
+      }
+
+      function isCardInBand(card) {
+        if (!card || card.offsetParent === null) return false;
+        const rect = card.getBoundingClientRect();
+        const { bandTop, bandBottom } = getBandBounds();
+        const cardCenterY = rect.top + rect.height * 0.5;
+        return cardCenterY >= bandTop && cardCenterY <= bandBottom && rect.bottom > bandTop && rect.top < window.innerHeight;
+      }
+
+      function stopActive(immediate = false) {
+        if (dwellTimer) {
+          clearTimeout(dwellTimer);
+          dwellTimer = null;
+        }
+        if (fadeOutTimer) {
+          clearTimeout(fadeOutTimer);
+          fadeOutTimer = null;
+        }
+        if (activeVideo) {
+          const v = activeVideo;
+          v.classList.remove('playing');
+          if (immediate) {
+            v.pause();
+            try { v.currentTime = 0; } catch (_) {}
+          } else {
+            fadeOutTimer = setTimeout(() => {
+              v.pause();
+              try { v.currentTime = 0; } catch (_) {}
+            }, 400);
+          }
+        }
+        activeCard = null;
+        activeVideo = null;
+      }
+
+      function getEligibleCardsInBand() {
+        const cards = Array.from(document.querySelectorAll('.tencha-card[data-has-video="1"]:not(.is-agotado), .menu-card[data-has-video="1"]:not(.is-agotado)'));
+        if (!cards.length) return [];
+        return cards.filter(isCardInBand);
+      }
+
+      function playCard(card) {
+        if (!card || card === activeCard) return;
+
+        // Desvanecer video anterior si estaba reproduciendo
+        if (activeVideo && activeCard !== card) {
+          const oldVideo = activeVideo;
+          oldVideo.classList.remove('playing');
+          setTimeout(() => {
+            if (activeVideo !== oldVideo) {
+              oldVideo.pause();
+              try { oldVideo.currentTime = 0; } catch (_) {}
+            }
+          }, 400);
+        }
+
+        const prodId = Number(card.getAttribute('data-prod-id'));
+        const prod = state.find(p => p.id === prodId);
+        if (!prod || !prod.video) return;
+
+        let videoEl = card.querySelector('.card-video');
+        if (!videoEl) {
+          videoEl = document.createElement('video');
+          videoEl.className = 'card-video';
+          videoEl.muted = true;
+          videoEl.loop = true;
+          videoEl.playsInline = true;
+          videoEl.setAttribute('muted', '');
+          videoEl.setAttribute('playsinline', '');
+          videoEl.setAttribute('webkit-playsinline', '');
+          videoEl.preload = 'auto';
+          videoEl.src = prod.video;
+
+          const thumbWrap = card.querySelector('.menu-thumb-wrap');
+          const firstOverlay = card.querySelector('.tencha-overlay-top');
+          if (thumbWrap) {
+            thumbWrap.appendChild(videoEl);
+          } else if (firstOverlay) {
+            card.insertBefore(videoEl, firstOverlay);
+          } else {
+            card.appendChild(videoEl);
+          }
+        }
+
+        activeCard = card;
+        activeVideo = videoEl;
+
+        const playPromise = videoEl.play();
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            if (activeCard === card && isCardInBand(card)) {
+              videoEl.classList.add('playing');
+            }
+          }).catch(() => {});
+        }
+      }
+
+      function handleScroll() {
+        const modal = document.getElementById('productModalBackdrop');
+        if (modal && modal.classList.contains('active')) return;
+
+        // 1. REGLA CLAVE DE TENCHA: Si la tarjeta activa SIGUE dentro de la banda,
+        // no la detenemos para permitir micro-scroll fluido
+        if (activeCard && isCardInBand(activeCard)) {
+          if (dwellTimer) {
+            clearTimeout(dwellTimer);
+            dwellTimer = null;
+          }
+          return;
+        }
+
+        // 2. Si ya salió de la banda, apagarla
+        if (activeCard && !isCardInBand(activeCard)) {
+          stopActive(false);
+        }
+
+        // 3. Programar la activación de la siguiente tarjeta candidata en la banda
+        if (dwellTimer) {
+          clearTimeout(dwellTimer);
+          dwellTimer = null;
+        }
+
+        dwellTimer = setTimeout(() => {
+          if (modal && modal.classList.contains('active')) return;
+
+          const candidates = getEligibleCardsInBand();
+          if (!candidates.length) return;
+
+          if (activeCard && candidates.includes(activeCard)) {
+            return;
+          }
+
+          const chosenCard = candidates[Math.floor(Math.random() * candidates.length)];
+          playCard(chosenCard);
+        }, 450);
+      }
+
+      window.addEventListener('scroll', handleScroll, { passive: true });
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) stopActive(true);
+        else handleScroll();
+      });
+
+      return { stopActive, scheduleFocus: handleScroll };
+    }
+
+    // =========================================================================
+    // MODAL POPUP DE PRODUCTO (VIDEO / FOTO)
+    // =========================================================================
+    function openProductModal(id) {
+      if (cardVideoController) cardVideoController.stopActive(true);
+      const prod = state.find(p => p.id === id);
+      if (!prod) return;
+
+      const backdrop = document.getElementById('productModalBackdrop');
+      const videoEl = document.getElementById('modalVideo');
+      const imgEl = document.getElementById('modalImg');
+      const jpEl = document.getElementById('modalJp');
+      const titleEl = document.getElementById('modalTitle');
+      const descEl = document.getElementById('modalDesc');
+      const priceEl = document.getElementById('modalPrice');
+      const agotadoBadge = document.getElementById('modalAgotadoBadge');
+
+      jpEl.textContent = prod.jp || '';
+      titleEl.textContent = prod.nombre;
+      descEl.textContent = prod.sub || '';
+      priceEl.textContent = fmt(prod.precio);
+      agotadoBadge.style.display = prod.agotado ? 'inline-block' : 'none';
+
+      if (prod.video) {
+        imgEl.style.display = 'none';
+        videoEl.src = prod.video;
+        videoEl.style.display = 'block';
+        videoEl.play().catch(() => {
+          videoEl.style.display = 'none';
+          imgEl.src = prod.foto;
+          imgEl.style.display = 'block';
+        });
+      } else {
+        videoEl.style.display = 'none';
+        imgEl.src = prod.foto;
+        imgEl.style.display = 'block';
+      }
+
+      backdrop.classList.add('active');
+    }
+
+    function closeProductModal(e) {
+      if (e && e.target !== document.getElementById('productModalBackdrop') && !e.target.classList.contains('modal-close-btn')) {
+        return;
+      }
+      const backdrop = document.getElementById('productModalBackdrop');
+      const videoEl = document.getElementById('modalVideo');
+      backdrop.classList.remove('active');
+      if (videoEl) {
+        videoEl.pause();
+        videoEl.removeAttribute('src');
+        videoEl.load();
+      }
+      if (cardVideoController) setTimeout(cardVideoController.scheduleFocus, 100);
+    }
+
+    // Inicializar al cargar
+    document.addEventListener('DOMContentLoaded', () => {
+      setTheme('oscuro');
+      setLayoutMode('visual');
+      preloadProductsMedia();
+      renderMenu();
+      cardVideoController = initCardVideoFocus();
+    });
+
+    // Tecla Escape cierra modal o drawer
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeControlDrawer();
+        closeProductModal();
+      }
+    });
+  </script>
+
+</body>
+</html>
