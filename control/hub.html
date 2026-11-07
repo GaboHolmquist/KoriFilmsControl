@@ -71,63 +71,14 @@
     <!-- ESTADO DE CARGA -->
     <div id="hub-loading" class="text-center" style="padding: 3rem 0;">
       <div class="spinner" style="margin: 0 auto 1rem; width: 32px; height: 32px; border-width: 3px;"></div>
-      <p class="text-muted">Conectando con el servidor y cargando métricas en tiempo real...</p>
+      <p class="text-muted">Cargando cartas digitales activas...</p>
     </div>
 
-    <!-- CONTENIDO DEL HUB -->
+    <!-- CONTENIDO DEL HUB: SOLO LISTA DE CARTAS ACTIVAS -->
     <div id="hub-content" class="hidden">
-      <!-- TARJETAS DE MÉTRICAS GLOBALES (KPIS) -->
-      <section class="kpi-grid">
-        <div class="kpi-card">
-          <div class="kpi-card-header">
-            <span class="kpi-title">Locales Activos</span>
-            <div class="kpi-icon">🏬</div>
-          </div>
-          <div id="kpi-locales-count" class="kpi-value text-accent">-</div>
-          <div class="kpi-subtext">Clientes en la plataforma</div>
-        </div>
-
-        <div class="kpi-card">
-          <div class="kpi-card-header">
-            <span class="kpi-title">Productos en Carta</span>
-            <div class="kpi-icon">🍵</div>
-          </div>
-          <div id="kpi-productos-count" class="kpi-value">-</div>
-          <div class="kpi-subtext">Ítems gastronómicos registrados</div>
-        </div>
-
-        <div class="kpi-card">
-          <div class="kpi-card-header">
-            <span class="kpi-title">En Carta (Disponibles)</span>
-            <div class="kpi-icon">✅</div>
-          </div>
-          <div id="kpi-disponibles-count" class="kpi-value text-success">-</div>
-          <div class="kpi-subtext">Visibles para los comensales</div>
-        </div>
-
-        <div class="kpi-card">
-          <div class="kpi-card-header">
-            <span class="kpi-title">Pausados (Agotados)</span>
-            <div class="kpi-icon">⏸️</div>
-          </div>
-          <div id="kpi-pausados-count" class="kpi-value text-warning">-</div>
-          <div class="kpi-subtext">Fuera de servicio temporal</div>
-        </div>
-
-        <div class="kpi-card">
-          <div class="kpi-card-header">
-            <span class="kpi-title">Visitas a las Cartas</span>
-            <div class="kpi-icon">📊</div>
-          </div>
-          <div id="kpi-visitas-count" class="kpi-value">-</div>
-          <div class="kpi-subtext">Aperturas de menús por QR</div>
-        </div>
-      </section>
-
-      <!-- LISTA DE RESTAURANTES / LOCALES -->
       <section>
         <div class="page-header-row" style="margin-bottom: 1.25rem;">
-          <h2 style="font-size: 1.25rem; font-weight: 700;">Restaurantes y Cafeterías Gestionados</h2>
+          <h2 style="font-size: 1.25rem; font-weight: 700;">Cartas Digitales Activas</h2>
         </div>
         <div id="locales-container" class="locales-grid">
           <!-- Renderizado dinámico vía hub.js -->
@@ -235,6 +186,6 @@
     </div>
   </div>
 
-  <script type="module" src="../js/hub.js?v=2"></script>
+  <script type="module" src="../js/hub.js?v=3"></script>
 </body>
 </html>

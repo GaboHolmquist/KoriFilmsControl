@@ -9,9 +9,6 @@ import {
   getUsuariosByLocal,
   addUsuarioToLocal,
   removeUsuarioFromLocal,
-  fetchProductos,
-  fetchCategorias,
-  fetchVisitasCount,
 } from './data-client.js';
 
 let activeLocalForUsersModal = null;
@@ -21,7 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const session = await requireAuth({ requireSuperadmin: true });
   if (!session) return;
 
-  // Cargar datos iniciales
+  // Cargar lista de cartas activas
   await loadHubData();
 
   // Configurar listeners de modales
@@ -34,50 +31,16 @@ async function loadHubData() {
 
   try {
     const locales = getLocales();
-
-    const [productos, categorias, totalVisitas] = await Promise.all([
-      fetchProductos('tencha').catch(() => []),
-      fetchCategorias('tencha').catch(() => []),
-      fetchVisitasCount('tencha').catch(() => 0),
-    ]);
-
-    const totalProductos = productos.length;
-    const disponibles = productos.filter((p) => p.disponible !== false).length;
-    const pausados = totalProductos - disponibles;
-
-    renderKPICards({
-      totalLocales: locales.length,
-      totalProductos,
-      disponibles,
-      pausados,
-      totalCategorias: categorias.length,
-      totalVisitas,
-    });
-
-    renderLocalesList(locales, { totalProductos, disponibles, pausados, categoriasCount: categorias.length });
+    renderLocalesList(locales);
   } catch (error) {
-    showNotification('Error al cargar métricas del servidor', 'error');
+    showNotification('Error al cargar cartas activas', 'error');
   } finally {
     if (loadingEl) loadingEl.classList.add('hidden');
     if (contentEl) contentEl.classList.remove('hidden');
   }
 }
 
-function renderKPICards({ totalLocales, totalProductos, disponibles, pausados, totalCategorias, totalVisitas }) {
-  const kpiLocales = document.getElementById('kpi-locales-count');
-  const kpiProductos = document.getElementById('kpi-productos-count');
-  const kpiDisponibles = document.getElementById('kpi-disponibles-count');
-  const kpiPausados = document.getElementById('kpi-pausados-count');
-  const kpiVisitas = document.getElementById('kpi-visitas-count');
-
-  if (kpiLocales) kpiLocales.textContent = totalLocales;
-  if (kpiProductos) kpiProductos.textContent = totalProductos;
-  if (kpiDisponibles) kpiDisponibles.textContent = disponibles;
-  if (kpiPausados) kpiPausados.textContent = pausados;
-  if (kpiVisitas) kpiVisitas.textContent = totalVisitas.toLocaleString('es-CL');
-}
-
-function renderLocalesList(locales, tenchaStats) {
+function renderLocalesList(locales) {
   const container = document.getElementById('locales-container');
   if (!container) return;
 
@@ -86,10 +49,6 @@ function renderLocalesList(locales, tenchaStats) {
   locales.forEach((local) => {
     const usuarios = getUsuariosByLocal(local.id);
     const isTencha = local.id === 'tencha';
-    const totalProd = isTencha ? tenchaStats.totalProductos : 0;
-    const disp = isTencha ? tenchaStats.disponibles : 0;
-    const paus = isTencha ? tenchaStats.pausados : 0;
-    const catCount = isTencha ? tenchaStats.categoriasCount : 0;
 
     const card = document.createElement('div');
     card.className = 'local-card';
@@ -108,29 +67,6 @@ function renderLocalesList(locales, tenchaStats) {
             </div>
             <p class="local-meta">${local.tipo} • ${local.ciudad || 'Chile'}</p>
           </div>
-        </div>
-      </div>
-
-      <div class="local-stats-row">
-        <div class="local-stat-item">
-          <span class="local-stat-num">${totalProd}</span>
-          <span class="local-stat-lbl">Productos</span>
-        </div>
-        <div class="local-stat-item">
-          <span class="local-stat-num text-success">${disp}</span>
-          <span class="local-stat-lbl">En Carta</span>
-        </div>
-        <div class="local-stat-item">
-          <span class="local-stat-num ${paus > 0 ? 'text-warning' : ''}">${paus}</span>
-          <span class="local-stat-lbl">Pausados</span>
-        </div>
-        <div class="local-stat-item">
-          <span class="local-stat-num">${catCount}</span>
-          <span class="local-stat-lbl">Categorías</span>
-        </div>
-        <div class="local-stat-item">
-          <span class="local-stat-num text-accent">${usuarios.length}</span>
-          <span class="local-stat-lbl">Usuarios</span>
         </div>
       </div>
 
