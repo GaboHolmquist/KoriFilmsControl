@@ -50,6 +50,31 @@
   <!-- Dashboard View (Carga directa sin flash de login) -->
   <main class="dashboard" id="dashboardView">
     
+    <!-- Globo de Auditoría y Control de Actividad para Superadmin -->
+    <div id="superadminAuditBalloon" class="superadmin-audit-balloon" style="display: none;">
+      <div class="audit-balloon-bar">
+        <div class="audit-balloon-icon">🛡️</div>
+        <div class="audit-balloon-content">
+          <div class="audit-balloon-title">Supervisión Superadmin — Actividad del Restaurante</div>
+          <p class="audit-balloon-summary" id="superadminAuditSummary">
+            Cargando historial de accesos...
+          </p>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline btn-audit-toggle" id="btnToggleAuditDetails">
+          📜 Ver Historial de Horarios y Cambios (<span id="auditChangesCountBadge">0</span>)
+        </button>
+      </div>
+      <div id="superadminAuditDetails" class="audit-balloon-dropdown" style="display: none;">
+        <div class="audit-details-header">
+          <span>Historial cronológico de accesos, horarios y modificaciones:</span>
+          <span id="auditDetailsCounter" class="text-xs" style="color: var(--muted); font-family: monospace;"></span>
+        </div>
+        <div class="audit-timeline-container" id="superadminAuditTimeline">
+          <!-- Generado dinámicamente -->
+        </div>
+      </div>
+    </div>
+    
     <!-- Stats de Menú -->
     <div class="stats-bar" style="margin-bottom: 12px;">
       <div class="stat-card">
@@ -222,6 +247,6 @@
     <span id="toastMsg">Guardado con éxito</span>
   </div>
 
-  <script src="../js/admin.js?v=7"></script>
+  <script src="../js/admin.js?v=8"></script>
 </body>
 </html>

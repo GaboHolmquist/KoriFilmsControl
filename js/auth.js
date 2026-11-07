@@ -3,7 +3,7 @@
 // ==============================================================================
 
 import { CONFIG } from './config.js';
-import { getDbClient } from './data-client.js';
+import { getDbClient, recordAuditLog } from './data-client.js';
 import { isSuperadmin, getAssignedLocalForUser } from './auth-guard.js';
 
 let countdownInterval = null;
@@ -218,6 +218,18 @@ async function handleLoginSubmit(e) {
 
       localStorage.setItem(CONFIG.sessionStorageKey, JSON.stringify(session));
       localStorage.setItem('kfc_admin_last_activity', Date.now().toString());
+
+      if (!isSuperadmin(authUser.email)) {
+        const local = getAssignedLocalForUser(authUser.email);
+        recordAuditLog({
+          localId: local ? local.id : 'tencha',
+          userEmail: authUser.email,
+          userRole: 'admin_local',
+          type: 'login',
+          action: 'Ingreso al panel',
+          detail: 'El administrador ingresó a la configuración de la carta',
+        });
+      }
 
       if (submitText) submitText.textContent = '¡Acceso concedido!';
       showSuccess('Acceso exitoso. Redirigiendo a la plataforma...');

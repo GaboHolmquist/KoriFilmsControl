@@ -256,6 +256,33 @@
     </div>
   </div>
 
-  <script type="module" src="../js/hub.js?v=4"></script>
+  <!-- MODAL: HISTORIAL DE ACTIVIDAD Y CAMBIOS (SUPERADMIN) -->
+  <div id="audit-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal-window" style="max-width: 640px;">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title" id="audit-modal-title">Historial de Actividad</h3>
+          <p id="audit-modal-subtitle" class="text-xs text-muted" style="margin-top: 2px;">Ingresos y modificaciones en la carta</p>
+        </div>
+        <button id="close-audit-modal-btn" class="modal-close-btn" aria-label="Cerrar modal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div id="audit-modal-timeline" class="audit-timeline">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="close-audit-modal-footer-btn" class="btn btn-secondary">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="../js/hub.js?v=5"></script>
 </body>
 </html>

@@ -9,6 +9,9 @@ import {
   getUsuariosByLocal,
   addUsuarioToLocal,
   removeUsuarioFromLocal,
+  getAuditLogs,
+  getAdminLoginsCount30Days,
+  getAdminChangesCount,
 } from './data-client.js';
 
 let activeLocalForUsersModal = null;
@@ -49,6 +52,15 @@ function renderLocalesList(locales) {
   locales.forEach((local) => {
     const usuarios = getUsuariosByLocal(local.id);
     const isTencha = local.id === 'tencha';
+    const loginsCount = getAdminLoginsCount30Days(local.id);
+    const changesCount = getAdminChangesCount(local.id);
+
+    let loginsText = 'El administrador del restaurante aún no ha ingresado en los últimos 30 días.';
+    if (loginsCount === 1) {
+      loginsText = 'El administrador del restaurante ha ingresado <strong>1 vez</strong> en los últimos 30 días.';
+    } else if (loginsCount > 1) {
+      loginsText = `El administrador del restaurante ha ingresado <strong>${loginsCount} veces</strong> en los últimos 30 días.`;
+    }
 
     const card = document.createElement('div');
     card.className = 'local-card';
@@ -67,6 +79,22 @@ function renderLocalesList(locales) {
             </div>
             <p class="local-meta">${local.tipo} • ${local.ciudad || 'Chile'}</p>
           </div>
+        </div>
+      </div>
+
+      <!-- Globo de Control de Accesos y Supervisión Superadmin -->
+      <div class="local-audit-balloon">
+        <div class="audit-balloon-header">
+          <div class="audit-balloon-icon">🛡️</div>
+          <div class="audit-balloon-info">
+            <span class="audit-balloon-tag">Supervisión Superadmin</span>
+            <p class="audit-balloon-text">${loginsText}</p>
+          </div>
+        </div>
+        <div class="audit-balloon-footer">
+          <button class="btn-audit-trigger" data-local-id="${local.id}" data-local-name="${local.nombre}">
+            📜 Ver historial de cambios (${changesCount})
+          </button>
         </div>
       </div>
 
@@ -118,6 +146,14 @@ function renderLocalesList(locales) {
     btn.addEventListener('click', () => {
       const localId = btn.getAttribute('data-local-id');
       openUsersModal(localId);
+    });
+  });
+
+  document.querySelectorAll('.btn-audit-trigger').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const localId = btn.getAttribute('data-local-id');
+      const localName = btn.getAttribute('data-local-name');
+      openAuditModal(localId, localName);
     });
   });
 }
@@ -276,6 +312,17 @@ function setupModalListeners() {
     });
   }
 
+  const auditModal = document.getElementById('audit-modal');
+  const closeAuditModalBtn = document.getElementById('close-audit-modal-btn');
+  const closeAuditModalFooterBtn = document.getElementById('close-audit-modal-footer-btn');
+
+  const closeAuditModal = () => {
+    if (auditModal) auditModal.classList.add('hidden');
+  };
+
+  if (closeAuditModalBtn) closeAuditModalBtn.addEventListener('click', closeAuditModal);
+  if (closeAuditModalFooterBtn) closeAuditModalFooterBtn.addEventListener('click', closeAuditModal);
+
   if (btnNewLocal && newLocalModal) {
     btnNewLocal.addEventListener('click', () => {
       newLocalModal.classList.remove('hidden');
@@ -363,6 +410,61 @@ function setupModalListeners() {
   }
 }
 
+function openAuditModal(localId, localName) {
+  const modal = document.getElementById('audit-modal');
+  const titleEl = document.getElementById('audit-modal-title');
+  const subtitleEl = document.getElementById('audit-modal-subtitle');
+  const timelineEl = document.getElementById('audit-modal-timeline');
+
+  if (titleEl) titleEl.textContent = `Historial: ${localName}`;
+  if (subtitleEl) subtitleEl.textContent = `Registro de ingresos y cambios para ${localName}`;
+
+  if (timelineEl) {
+    const logs = getAuditLogs(localId);
+    if (!logs || logs.length === 0) {
+      timelineEl.innerHTML = '<p class="text-muted" style="padding: 1.5rem 0; text-align: center;">Aún no se han registrado eventos para esta carta.</p>';
+    } else {
+      timelineEl.innerHTML = logs
+        .map((item) => {
+          const dateStr = new Date(item.timestamp).toLocaleString('es-CL', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+          });
+
+          let badgeClass = 'audit-badge-edit';
+          let badgeText = 'Modificó';
+          if (item.type === 'login') {
+            badgeClass = 'audit-badge-login';
+            badgeText = 'Ingreso';
+          } else if (item.type === 'create') {
+            badgeClass = 'audit-badge-create';
+            badgeText = 'Creó';
+          } else if (item.type === 'delete') {
+            badgeClass = 'audit-badge-delete';
+            badgeText = 'Eliminó';
+          }
+
+          return `
+            <div class="audit-event-item">
+              <div class="audit-event-header">
+                <span class="audit-badge ${badgeClass}">${badgeText}</span>
+                <span class="audit-event-time">${dateStr}</span>
+              </div>
+              <div class="audit-event-detail">${item.detail || item.action}</div>
+              <div class="audit-event-user">👤 ${item.userEmail || 'admin_local'}</div>
+            </div>
+          `;
+        })
+        .join('');
+    }
+  }
+
+  if (modal) modal.classList.remove('hidden');
+}
+
 function buildAntigravityPrompt(nombre, tipo, ciudad, rutaDestino) {
   return `Hola. Estamos iniciando el proyecto de la Carta Digital Interactiva para **${nombre}** (${tipo} en ${ciudad}).
 
@@ -391,7 +493,6 @@ Este proyecto fue generado a partir de la plantilla estandarizada de alta conver
 4. Mantener la carta funcionando en modo local hasta que definamos el nombre del repositorio y la autorización para desplegarla en GitHub Pages / Producción.
 
 Comencemos revisando qué categorías y productos vamos a cargar primero.`;
-}
 }
 
 function showNotification(text, type = 'info') {

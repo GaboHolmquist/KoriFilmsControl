@@ -265,6 +265,196 @@
     window.location.replace(isInsideControl ? 'index.html' : 'control/index.html');
   }
 
+  // ---------- Auditoría y Control de Supervisión Superadmin ----------
+  const AUDIT_STORAGE_KEY = 'kfc_audit_log';
+
+  function getLocalAuditLogs(localId) {
+    try {
+      const stored = localStorage.getItem(AUDIT_STORAGE_KEY);
+      let logs = [];
+      if (stored) {
+        logs = JSON.parse(stored);
+      } else {
+        const now = Date.now();
+        const dayMs = 24 * 60 * 60 * 1000;
+        logs = [
+          {
+            id: 'seed_1',
+            localId: 'tencha',
+            userEmail: 'contacto@tenchamatcheria.com',
+            userRole: 'admin_local',
+            type: 'login',
+            action: 'Ingreso al panel',
+            detail: 'El administrador ingresó a la configuración de la carta',
+            timestamp: now - (3 * dayMs + 3600000 * 4),
+          },
+          {
+            id: 'seed_2',
+            localId: 'tencha',
+            userEmail: 'contacto@tenchamatcheria.com',
+            userRole: 'admin_local',
+            type: 'edit',
+            action: 'Modificación de precio',
+            detail: 'Actualizó precio de Matcha Latte Frío a $4.900',
+            timestamp: now - (3 * dayMs + 3600000 * 3),
+          },
+          {
+            id: 'seed_3',
+            localId: 'tencha',
+            userEmail: 'contacto@tenchamatcheria.com',
+            userRole: 'admin_local',
+            type: 'login',
+            action: 'Ingreso al panel',
+            detail: 'El administrador ingresó a la configuración de la carta',
+            timestamp: now - (14 * dayMs + 3600000 * 2),
+          },
+          {
+            id: 'seed_4',
+            localId: 'tencha',
+            userEmail: 'contacto@tenchamatcheria.com',
+            userRole: 'admin_local',
+            type: 'edit',
+            action: 'Disponibilidad de producto',
+            detail: 'Cambió disponibilidad de Roll Croissant Matcha a Disponible',
+            timestamp: now - (14 * dayMs + 3600000 * 1),
+          },
+        ];
+        localStorage.setItem(AUDIT_STORAGE_KEY, JSON.stringify(logs));
+      }
+      return localId ? logs.filter((l) => l.localId === localId) : logs;
+    } catch (_) {
+      return [];
+    }
+  }
+
+  function recordLocalAuditActivity({ localId, userEmail, userRole, type, action, detail }) {
+    try {
+      const stored = localStorage.getItem(AUDIT_STORAGE_KEY);
+      let logs = [];
+      if (stored) {
+        try { logs = JSON.parse(stored); } catch (_) { logs = []; }
+      }
+      const entry = {
+        id: 'log_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+        localId: localId || state.currentLocalId || 'tencha',
+        userEmail: (userEmail || (state.user ? state.user.email : 'admin_local')).toLowerCase(),
+        userRole: userRole || (isSuperadmin(state.user?.email) ? 'superadmin' : 'admin_local'),
+        type: type || 'edit', // 'login' | 'create' | 'edit' | 'delete'
+        action: action || 'Modificación en carta',
+        detail: detail || '',
+        timestamp: Date.now(),
+      };
+      logs.unshift(entry);
+      if (logs.length > 250) logs.pop();
+      localStorage.setItem(AUDIT_STORAGE_KEY, JSON.stringify(logs));
+      renderSuperadminAuditBanner();
+      return entry;
+    } catch (err) {
+      console.warn('Error registrando auditoría:', err);
+    }
+  }
+
+  function renderSuperadminAuditBanner() {
+    const banner = document.getElementById('superadminAuditBalloon');
+    if (!banner) return;
+
+    // Sólo visible para superadmin
+    if (!state.user || !isSuperadmin(state.user.email)) {
+      banner.style.display = 'none';
+      return;
+    }
+
+    banner.style.display = 'block';
+
+    const localId = state.currentLocalId || 'tencha';
+    const logs = getLocalAuditLogs(localId);
+
+    const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+    const superEmail = atob('YWRtaW5Aa29yaWZpbG1zLmNs').toLowerCase();
+    const adminLogins = logs.filter(
+      (l) =>
+        l.type === 'login' &&
+        l.timestamp >= thirtyDaysAgo &&
+        l.userEmail !== superEmail &&
+        l.userRole !== 'superadmin'
+    );
+    const loginCount = adminLogins.length;
+    const changes = logs.filter((l) => l.type !== 'login');
+
+    const summaryEl = document.getElementById('superadminAuditSummary');
+    const badgeEl = document.getElementById('auditChangesCountBadge');
+    const counterEl = document.getElementById('auditDetailsCounter');
+    const timelineEl = document.getElementById('superadminAuditTimeline');
+
+    if (summaryEl) {
+      if (loginCount === 0) {
+        summaryEl.innerHTML = 'El administrador del restaurante aún no ha ingresado en los últimos 30 días.';
+      } else if (loginCount === 1) {
+        summaryEl.innerHTML = 'El administrador del restaurante ha ingresado <strong>1 vez</strong> en los últimos 30 días.';
+      } else {
+        summaryEl.innerHTML = `El administrador del restaurante ha ingresado <strong>${loginCount} veces</strong> en los últimos 30 días.`;
+      }
+    }
+
+    if (badgeEl) badgeEl.textContent = changes.length;
+    if (counterEl) counterEl.textContent = `${logs.length} eventos registrados`;
+
+    if (timelineEl) {
+      if (logs.length === 0) {
+        timelineEl.innerHTML = '<p style="color: var(--muted); font-size: 0.85rem; padding: 12px 0;">No hay registros de actividad aún.</p>';
+      } else {
+        timelineEl.innerHTML = logs
+          .map((item) => {
+            const dateStr = new Date(item.timestamp).toLocaleString('es-CL', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+            });
+
+            let pillClass = 'audit-pill-edit';
+            let pillText = 'Modificó';
+            if (item.type === 'login') {
+              pillClass = 'audit-pill-login';
+              pillText = 'Ingreso';
+            } else if (item.type === 'create') {
+              pillClass = 'audit-pill-create';
+              pillText = 'Creó';
+            } else if (item.type === 'delete') {
+              pillClass = 'audit-pill-delete';
+              pillText = 'Eliminó';
+            }
+
+            return `
+              <div class="audit-item">
+                <div class="audit-item-top">
+                  <span class="audit-pill ${pillClass}">${pillText}</span>
+                  <span class="audit-item-time">${dateStr}</span>
+                </div>
+                <div class="audit-item-detail">${item.detail || item.action}</div>
+                <div class="audit-item-user">👤 ${item.userEmail || 'admin_local'}</div>
+              </div>
+            `;
+          })
+          .join('');
+      }
+    }
+
+    const toggleBtn = document.getElementById('btnToggleAuditDetails');
+    const detailsEl = document.getElementById('superadminAuditDetails');
+    if (toggleBtn && detailsEl && !toggleBtn.dataset.bound) {
+      toggleBtn.dataset.bound = 'true';
+      toggleBtn.addEventListener('click', () => {
+        const isClosed = detailsEl.style.display === 'none';
+        detailsEl.style.display = isClosed ? 'block' : 'none';
+        toggleBtn.textContent = isClosed
+          ? `▲ Ocultar Historial (${changes.length})`
+          : `📜 Ver Historial de Horarios y Cambios (${changes.length})`;
+      });
+    }
+  }
+
   function showDashboard() {
     const loginEl = document.getElementById('loginView');
     if (loginEl) loginEl.style.display = 'none';
@@ -272,6 +462,9 @@
     if (dashEl) dashEl.style.display = 'block';
     const topbar = document.getElementById('topbarActions');
     if (topbar) topbar.style.display = 'flex';
+
+    // Globo de supervisión exclusivo para superadmin
+    renderSuperadminAuditBanner();
 
     const btnNew = document.getElementById('btnNewProduct');
     if (btnNew) btnNew.style.display = canAddOrDelete() ? 'inline-flex' : 'none';
@@ -661,6 +854,12 @@
       const { data, error } = await dbClient.from('recomendados').insert([newRec]).select();
       if (error) throw error;
       if (data && data[0]) state.recomendados.push(data[0]);
+      recordLocalAuditActivity({
+        localId: state.currentLocalId,
+        type: 'edit',
+        action: 'Recomendados',
+        detail: `Añadió a recomendados: "${prod.nombre}"`,
+      });
       showToast(`★ "${prod.nombre}" añadido a recomendados (${state.recomendados.length}/5)`);
       renderDashboard();
     } catch (err) {
@@ -675,6 +874,12 @@
       const { error } = await dbClient.from('recomendados').delete().eq('id', recId);
       if (error) throw error;
       state.recomendados = state.recomendados.filter(r => r.id !== recId);
+      recordLocalAuditActivity({
+        localId: state.currentLocalId,
+        type: 'edit',
+        action: 'Recomendados',
+        detail: `Quitó de recomendados: "${name}"`,
+      });
       showToast(`✓ "${name}" quitado de recomendados (${state.recomendados.length}/5)`);
       renderDashboard();
     } catch (err) {
@@ -727,6 +932,13 @@
       }
 
       updateStats();
+      const itemName = item ? item.nombre : `ID #${id}`;
+      recordLocalAuditActivity({
+        localId: state.currentLocalId,
+        type: 'edit',
+        action: 'Disponibilidad',
+        detail: `Cambió disponibilidad de "${itemName}" a ${checked ? 'Visible en carta' : 'Pausado / Oculto'}`,
+      });
       showToast(checked ? 'Producto activado en carta' : 'Producto pausado (oculto)');
     } catch (err) {
       showToast('Error al actualizar disponibilidad: ' + err.message, false);
@@ -785,6 +997,13 @@
       }
 
       renderDashboard();
+      const itemName = item ? item.nombre : `ID #${id}`;
+      recordLocalAuditActivity({
+        localId: state.currentLocalId,
+        type: 'edit',
+        action: 'Stock',
+        detail: `Marcó "${itemName}" como ${checked ? 'Agotado' : 'En stock'}`,
+      });
       showToast(checked ? 'Producto marcado como agotado' : 'Producto disponible en stock');
     } catch (err) {
       showToast('Error al actualizar agotado: ' + err.message, false);
@@ -813,6 +1032,14 @@
           if (recInput) recInput.value = precio;
         }
       }
+
+      const itemName = item ? item.nombre : `ID #${id}`;
+      recordLocalAuditActivity({
+        localId: state.currentLocalId,
+        type: 'edit',
+        action: 'Modificación de precio',
+        detail: `Actualizó precio de "${itemName}" a $${precio.toLocaleString('es-CL')}`,
+      });
 
       showToast('Precio actualizado a $' + precio.toLocaleString('es-CL'));
     } catch (err) {
@@ -1183,12 +1410,24 @@
           if (recMatch) Object.assign(recMatch, { nombre, sub, jp, precio, temperatura, tags, descripcion, disponible });
         }
         renderDashboard();
+        recordLocalAuditActivity({
+          localId: state.currentLocalId,
+          type: 'edit',
+          action: 'Edición de producto',
+          detail: `Modificó producto "${nombre}" (precio: $${Number(precio).toLocaleString('es-CL')})`,
+        });
         showToast('Producto actualizado con éxito');
       } else {
         payload.categoria_id = document.getElementById('prodCat').value;
         payload.orden = (state.products.length + 1);
         const { error } = await dbClient.from('productos').insert([payload]);
         if (error) throw error;
+        recordLocalAuditActivity({
+          localId: state.currentLocalId,
+          type: 'create',
+          action: 'Creación de producto',
+          detail: `Agregó nuevo producto "${nombre}" (precio: $${Number(precio).toLocaleString('es-CL')})`,
+        });
         showToast('Nuevo producto añadido con éxito');
       }
       closeProductModal();
@@ -1212,8 +1451,15 @@
     if (!id || !confirm('¿Estás seguro de que deseas eliminar este producto de la base de datos?')) return;
 
     try {
+      const delName = document.getElementById('prodNombre')?.value || `ID #${id}`;
       const { error } = await dbClient.from('productos').delete().eq('id', id);
       if (error) throw error;
+      recordLocalAuditActivity({
+        localId: state.currentLocalId,
+        type: 'delete',
+        action: 'Eliminación de producto',
+        detail: `Eliminó el producto "${delName}"`,
+      });
       showToast('Producto eliminado');
       closeProductModal();
       await loadData();

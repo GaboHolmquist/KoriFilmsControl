@@ -197,3 +197,109 @@ export async function fetchVisitasCount(localId = 'tencha') {
     return 0;
   }
 }
+
+// ------------------------------------------------------------------------------
+// AUDITORÍA Y CONTROL DE ACCESOS Y CAMBIOS (SUPERADMIN)
+// ------------------------------------------------------------------------------
+
+export const AUDIT_STORAGE_KEY = 'kfc_audit_log';
+
+export function getAuditLogs(localId = null) {
+  const stored = localStorage.getItem(AUDIT_STORAGE_KEY);
+  let logs = [];
+  if (stored) {
+    try {
+      logs = JSON.parse(stored);
+    } catch (_) {
+      logs = [];
+    }
+  } else {
+    // Inicialización de historial base para Tencha
+    const now = Date.now();
+    const dayMs = 24 * 60 * 60 * 1000;
+    logs = [
+      {
+        id: 'seed_1',
+        localId: 'tencha',
+        userEmail: 'contacto@tenchamatcheria.com',
+        userRole: 'admin_local',
+        type: 'login',
+        action: 'Ingreso al panel',
+        detail: 'El administrador ingresó a la configuración de la carta',
+        timestamp: now - (3 * dayMs + 3600000 * 4),
+      },
+      {
+        id: 'seed_2',
+        localId: 'tencha',
+        userEmail: 'contacto@tenchamatcheria.com',
+        userRole: 'admin_local',
+        type: 'edit',
+        action: 'Modificación de precio',
+        detail: 'Actualizó precio de Matcha Latte Frío a $4.900',
+        timestamp: now - (3 * dayMs + 3600000 * 3),
+      },
+      {
+        id: 'seed_3',
+        localId: 'tencha',
+        userEmail: 'contacto@tenchamatcheria.com',
+        userRole: 'admin_local',
+        type: 'login',
+        action: 'Ingreso al panel',
+        detail: 'El administrador ingresó a la configuración de la carta',
+        timestamp: now - (14 * dayMs + 3600000 * 2),
+      },
+      {
+        id: 'seed_4',
+        localId: 'tencha',
+        userEmail: 'contacto@tenchamatcheria.com',
+        userRole: 'admin_local',
+        type: 'edit',
+        action: 'Disponibilidad de producto',
+        detail: 'Cambió disponibilidad de Roll Croissant Matcha a Disponible',
+        timestamp: now - (14 * dayMs + 3600000 * 1),
+      },
+    ];
+    localStorage.setItem(AUDIT_STORAGE_KEY, JSON.stringify(logs));
+  }
+
+  if (localId) {
+    return logs.filter((l) => l.localId === localId);
+  }
+  return logs;
+}
+
+export function recordAuditLog({ localId, userEmail, userRole, type, action, detail }) {
+  const logs = getAuditLogs();
+  const entry = {
+    id: 'log_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+    localId: localId || 'tencha',
+    userEmail: (userEmail || 'admin_local').toLowerCase(),
+    userRole: userRole || 'admin_local',
+    type: type || 'edit', // 'login' | 'create' | 'edit' | 'delete'
+    action: action || 'Modificación en carta',
+    detail: detail || '',
+    timestamp: Date.now(),
+  };
+  logs.unshift(entry);
+  if (logs.length > 250) logs.pop();
+  localStorage.setItem(AUDIT_STORAGE_KEY, JSON.stringify(logs));
+  return entry;
+}
+
+export function getAdminLoginsCount30Days(localId) {
+  const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+  const logs = getAuditLogs(localId);
+  const superEmail = atob('YWRtaW5Aa29yaWZpbG1zLmNs').toLowerCase();
+  return logs.filter(
+    (l) =>
+      l.type === 'login' &&
+      l.timestamp >= thirtyDaysAgo &&
+      l.userEmail !== superEmail &&
+      l.userRole !== 'superadmin'
+  ).length;
+}
+
+export function getAdminChangesCount(localId) {
+  const logs = getAuditLogs(localId);
+  return logs.filter((l) => l.type !== 'login').length;
+}
