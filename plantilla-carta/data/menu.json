@@ -1,0 +1,104 @@
+{
+  "recomendados": [
+    {
+      "id": 1,
+      "nombre": "Producto 1",
+      "sub": "Subtítulo o descripción breve",
+      "jp": "オススメ",
+      "precio": 4500,
+      "temperatura": "frio",
+      "tags": ["destacado"],
+      "disponible": true,
+      "descripcion": "Descripción del producto destacado 1. Preparado para recibir fotografía en proporción 4:5 y video vertical en loop sincronizado.",
+      "carpeta": "productos/01-categoria-1/01-producto-1",
+      "tiene_video": false,
+      "orden": 1
+    },
+    {
+      "id": 2,
+      "nombre": "Producto 2",
+      "sub": "Subtítulo o descripción breve",
+      "jp": "人気",
+      "precio": 5200,
+      "temperatura": "ambos",
+      "tags": ["destacado"],
+      "disponible": true,
+      "descripcion": "Descripción del producto destacado 2. Los datos se pueden editar directamente en data/menu.json o desde el panel de control.",
+      "carpeta": "productos/01-categoria-1/02-producto-2",
+      "tiene_video": false,
+      "orden": 2
+    }
+  ],
+  "categorias": [
+    {
+      "id": "cat-1",
+      "carpeta": "01-categoria-1",
+      "nombre": "Categoría 1",
+      "jp": "カテゴリー 1",
+      "intro": "Descripción breve de la categoría 1",
+      "items": [
+        {
+          "id": 1,
+          "nombre": "Producto 1",
+          "sub": "Subtítulo o especialidad",
+          "jp": "商品一",
+          "precio": 4500,
+          "temperatura": "frio",
+          "tags": ["frio"],
+          "disponible": true,
+          "descripcion": "Descripción detallada del producto 1 con sus ingredientes y características.",
+          "carpeta": "01-producto-1",
+          "tiene_video": false
+        },
+        {
+          "id": 2,
+          "nombre": "Producto 2",
+          "sub": "Subtítulo o especialidad",
+          "jp": "商品二",
+          "precio": 5200,
+          "temperatura": "ambos",
+          "tags": ["caliente"],
+          "disponible": true,
+          "descripcion": "Descripción detallada del producto 2 con sus ingredientes y características.",
+          "carpeta": "02-producto-2",
+          "tiene_video": false
+        }
+      ]
+    },
+    {
+      "id": "cat-2",
+      "carpeta": "02-categoria-2",
+      "nombre": "Categoría 2",
+      "jp": "カテゴリー 2",
+      "intro": "Descripción breve de la categoría 2",
+      "items": [
+        {
+          "id": 3,
+          "nombre": "Producto 1",
+          "sub": "Subtítulo o especialidad",
+          "jp": "商品一",
+          "precio": 4800,
+          "temperatura": "ambos",
+          "tags": ["vegano"],
+          "disponible": true,
+          "descripcion": "Descripción detallada del primer producto de la categoría 2.",
+          "carpeta": "01-producto-1",
+          "tiene_video": false
+        },
+        {
+          "id": 4,
+          "nombre": "Producto 2",
+          "sub": "Subtítulo o especialidad",
+          "jp": "商品二",
+          "precio": 6500,
+          "temperatura": "frio",
+          "tags": ["sin_gluten"],
+          "disponible": true,
+          "descripcion": "Descripción detallada del segundo producto de la categoría 2.",
+          "carpeta": "02-producto-2",
+          "tiene_video": false
+        }
+      ]
+    }
+  ]
+}

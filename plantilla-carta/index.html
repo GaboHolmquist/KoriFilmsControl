@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Carta Digital | {{NOMBRE_RESTAURANTE}}</title>
+  <meta name="description" content="Carta digital de {{NOMBRE_RESTAURANTE}}. Experiencia gastronómica interactiva.">
+  <meta name="theme-color" content="#1f1d1a">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="favicon.png">
+  <link rel="apple-touch-icon" href="favicon.png">
+  <link rel="stylesheet" href="css/style.css?v=1">
+</head>
+<body>
+  <header class="topbar">
+    <a href="#" class="brand" id="brandLink" aria-label="{{NOMBRE_RESTAURANTE}} — volver al inicio">
+      <span class="brand-text-fallback" style="font-size:1.15rem;font-weight:700;letter-spacing:-0.01em;">{{NOMBRE_RESTAURANTE}}</span>
+    </a>
+  </header>
+
+  <!-- Indicador Pull-to-Refresh estilo app móvil -->
+  <div class="ptr-wrap" id="ptrWrap" aria-hidden="true">
+    <div class="ptr-circle" id="ptrCircle">
+      <svg class="ptr-svg" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="9" stroke="rgba(255,240,215,0.18)" stroke-width="2.5"></circle>
+        <circle id="ptrArc" cx="12" cy="12" r="9" stroke="var(--matcha)" stroke-width="2.5" stroke-dasharray="56.5" stroke-dashoffset="56.5" stroke-linecap="round"></circle>
+      </svg>
+    </div>
+  </div>
+
+  <main>
+    <!-- Hero: carrusel de recomendados -->
+    <section class="hero" id="heroCarousel" aria-labelledby="recTitle">
+      <h2 class="rec-title" id="recTitle">Recomendados</h2>
+      <div class="carousel" id="carousel"></div>
+      <div class="dots" id="carouselDots"></div>
+    </section>
+
+    <!-- Categorías -->
+    <section class="section" id="categoriasSection">
+      <h1 class="title">Nuestra Carta<span class="title-jp jp">メニュー</span></h1>
+      <p class="subtitle">Elige una categoría</p>
+      <div class="cat-grid" id="catGrid"></div>
+
+      <!-- Filtros dietarios -->
+      <div class="diet-filter-box" id="dietFilterBox">
+        <span class="diet-filter-title">Filtrar por</span>
+        <div class="diet-filter-btns">
+          <button type="button" class="diet-btn" id="btnFilterVegano">
+            <span class="diet-btn-icon">🌱</span> Vegano
+          </button>
+          <button type="button" class="diet-btn" id="btnFilterSinGluten">
+            <span class="diet-btn-icon">🌾</span> Sin gluten
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Lista completa (se despliega al elegir categoría) -->
+    <section class="section menu-list" id="menuList" hidden>
+      <nav class="cat-bar" id="catBar" aria-label="Categorías"></nav>
+      <div id="menuSections"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <a href="https://www.instagram.com/kori.films/" target="_blank" rel="noopener noreferrer" class="ig-pill">
+      <svg class="ig-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+      </svg>
+      <span>Recuerda seguirnos en Instagram</span>
+    </a>
+    <a href="https://www.instagram.com/kori.films/" target="_blank" rel="noopener noreferrer">Carta Digital por <span>KORI.FILMS</span></a>
+  </footer>
+
+  <!-- Ventana flotante del producto -->
+  <dialog class="popup" id="productPopup">
+    <div class="popup-card" id="popupCard">
+      <button class="popup-close" id="popupClose" aria-label="Cerrar">✕</button>
+      <div class="popup-media-wrap">
+        <div class="popup-media" id="popupMedia"></div>
+        <div class="popup-tags" id="popupTags"></div>
+      </div>
+      <div class="popup-body" id="popupBody">
+        <div class="popup-row">
+          <h2 class="popup-head" id="popupHead"></h2>
+          <p class="popup-price" id="popupPrice"></p>
+        </div>
+        <p class="popup-desc" id="popupDesc"></p>
+        <div class="popup-variants" id="popupVariants"></div>
+      </div>
+      <div class="popup-nav">
+        <button id="popupPrev" aria-label="Anterior">‹</button>
+        <button id="popupNext" aria-label="Siguiente">›</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="js/main.js?v=1"></script>
+</body>
+</html>

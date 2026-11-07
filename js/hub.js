@@ -229,6 +229,53 @@ function setupModalListeners() {
   const closeNewLocalModalBtn = document.getElementById('close-new-local-modal-btn');
   const newLocalForm = document.getElementById('new-local-form');
 
+  const projectReadyModal = document.getElementById('project-ready-modal');
+  const closeProjectReadyModalBtn = document.getElementById('close-project-ready-modal-btn');
+  const closeProjectReadyFooterBtn = document.getElementById('close-project-ready-footer-btn');
+  const copyPathBtn = document.getElementById('copy-path-btn');
+  const copyCmdBtn = document.getElementById('copy-cmd-btn');
+  const copyPromptBtn = document.getElementById('copy-prompt-btn');
+
+  const closeProjectReady = () => {
+    if (projectReadyModal) projectReadyModal.classList.add('hidden');
+  };
+
+  if (closeProjectReadyModalBtn) closeProjectReadyModalBtn.addEventListener('click', closeProjectReady);
+  if (closeProjectReadyFooterBtn) closeProjectReadyFooterBtn.addEventListener('click', closeProjectReady);
+
+  if (copyPathBtn) {
+    copyPathBtn.addEventListener('click', () => {
+      const input = document.getElementById('ready-project-path');
+      if (input && input.value) {
+        navigator.clipboard.writeText(input.value).then(() => {
+          showNotification('Ruta copiada al portapapeles', 'success');
+        });
+      }
+    });
+  }
+
+  if (copyCmdBtn) {
+    copyCmdBtn.addEventListener('click', () => {
+      const input = document.getElementById('ready-project-cmd');
+      if (input && input.value) {
+        navigator.clipboard.writeText(input.value).then(() => {
+          showNotification('Comando terminal copiado', 'success');
+        });
+      }
+    });
+  }
+
+  if (copyPromptBtn) {
+    copyPromptBtn.addEventListener('click', () => {
+      const textarea = document.getElementById('ready-project-prompt');
+      if (textarea && textarea.value) {
+        navigator.clipboard.writeText(textarea.value).then(() => {
+          showNotification('Contexto para Antigravity copiado', 'success');
+        });
+      }
+    });
+  }
+
   if (btnNewLocal && newLocalModal) {
     btnNewLocal.addEventListener('click', () => {
       newLocalModal.classList.remove('hidden');
@@ -245,7 +292,7 @@ function setupModalListeners() {
     newLocalForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const nombre = document.getElementById('local-name-input').value.trim();
-      const tipo = document.getElementById('local-type-input').value.trim();
+      const tipo = document.getElementById('local-type-input').value.trim() || 'Restaurante / Cafetería';
       const ciudad = document.getElementById('local-city-input').value.trim() || 'Santiago, Chile';
       const adminEmail = document.getElementById('local-admin-email-input').value.trim().toLowerCase();
 
@@ -259,11 +306,17 @@ function setupModalListeners() {
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/(^-|-$)+/g, '');
 
+      // Generar nombre de carpeta limpia en Documents
+      const words = nombre.match(/[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ]+/g) || ['Carta'];
+      const folderName = words.map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join('');
+      const projectPath = `/Users/gabrielleholmquist/Documents/${folderName}`;
+      const terminalCmd = `python3 /Users/gabrielleholmquist/Documents/KoriFilmsControl/scripts/generar_carta.py --nombre "${nombre}" --tipo "${tipo}" --ciudad "${ciudad}"`;
+
       const nuevoLocal = {
         id: slug,
         slug: slug,
         nombre: nombre,
-        tipo: tipo || 'Restaurante / Cafetería',
+        tipo: tipo,
         ciudad: ciudad,
         activo: true,
         tablas: {
@@ -287,9 +340,58 @@ function setupModalListeners() {
       newLocalForm.reset();
       newLocalModal.classList.add('hidden');
       loadHubData();
-      showNotification(`Nuevo cliente ${nombre} creado con éxito`, 'success');
+
+      // Configurar y mostrar modal de proyecto y contexto Antigravity
+      if (projectReadyModal) {
+        const titleEl = document.getElementById('ready-modal-title');
+        const pathEl = document.getElementById('ready-project-path');
+        const cmdEl = document.getElementById('ready-project-cmd');
+        const promptEl = document.getElementById('ready-project-prompt');
+
+        if (titleEl) titleEl.textContent = `🎉 Proyecto Preparado: ${nombre}`;
+        if (pathEl) pathEl.value = projectPath;
+        if (cmdEl) cmdEl.value = terminalCmd;
+        if (promptEl) {
+          promptEl.value = buildAntigravityPrompt(nombre, tipo, ciudad, projectPath);
+        }
+
+        projectReadyModal.classList.remove('hidden');
+      }
+
+      showNotification(`Cliente ${nombre} registrado en modo local`, 'success');
     });
   }
+}
+
+function buildAntigravityPrompt(nombre, tipo, ciudad, rutaDestino) {
+  return `Hola. Estamos iniciando el proyecto de la Carta Digital Interactiva para **${nombre}** (${tipo} en ${ciudad}).
+
+Este proyecto fue generado a partir de la plantilla estandarizada de alta conversión de **Kori Films** (con la misma ingeniería y arquitectura de la carta de Tencha Matchería).
+
+📍 **Ubicación del Workspace:** \`${rutaDestino}\`
+
+### 📐 Arquitectura del Proyecto
+1. **Fuente de la verdad:** Toda la carta se controla desde \`data/menu.json\` (categorías, productos, precios, disponibilidad y recomendados).
+2. **Estructura limpia inicial:** El proyecto arranca en modo local con 2 categorías y 2 productos por categoría en blanco como base para ingestar la información.
+3. **Formatos multimedia recomendados:**
+   - Fotos: Proporción 4:5 vertical (720x900px), optimizadas en formato WebP en \`productos/<categoria>/<producto>/foto.webp\`.
+   - Videos en bucle: Video vertical sin audio (H.264 / 720p) en \`productos/<categoria>/<producto>/animacion.mp4\`.
+4. **Motor interactivo (\`js/main.js\`):**
+   - Carrusel automático de recomendados con dots sincronizados.
+   - Autoplay por franja de scroll (Viewport Band Focus: reproduce sutilmente el video al entrar en pantalla).
+   - Barra sticky de navegación rápida entre categorías.
+   - Popups modales táctiles para ver detalles, ingredientes y variantes.
+   - Paleta de diseño basada en variables en \`css/style.css\`.
+5. **Respaldo:** Cuenta con \`checkpoint/checkpoint.py\` para respaldar localmente en cualquier momento.
+
+### 🎯 Nuestro Objetivo en este Chat:
+1. Guiarme en definir los nombres reales de las categorías y productos de **${nombre}**.
+2. Adaptar la paleta de colores y el estilo visual según la identidad de la marca.
+3. Subir e ingestar las fotos y videos reales en sus respectivas carpetas.
+4. Mantener la carta funcionando en modo local hasta que definamos el nombre del repositorio y la autorización para desplegarla en GitHub Pages / Producción.
+
+Comencemos revisando qué categorías y productos vamos a cargar primero.`;
+}
 }
 
 function showNotification(text, type = 'info') {
