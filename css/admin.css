@@ -13,6 +13,12 @@
 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
+    html {
+      touch-action: pan-x pan-y;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+
     body {
       background: var(--bg);
       color: var(--text);
@@ -21,6 +27,9 @@
       display: flex;
       flex-direction: column;
       overflow-x: hidden;
+      touch-action: pan-x pan-y;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
     }
 
     .jp { font-family: 'Noto Sans JP', sans-serif; }
@@ -38,6 +47,13 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+    }
+
+    @media (min-width: 1140px) {
+      .topbar {
+        padding-left: calc((100vw - 1100px) / 2 + 16px);
+        padding-right: calc((100vw - 1100px) / 2 + 16px);
+      }
     }
     .topbar-brand {
       display: flex;

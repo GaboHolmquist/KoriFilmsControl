@@ -2,7 +2,7 @@
 <html lang="es" data-theme="oscuro">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Carta Digital Interactiva — Demo en Vivo | Kori Films</title>
   <meta name="description" content="Demostración interactiva de carta digital gastronómica con carrusel automático, barra de categorías y panel de control en tiempo real.">
   <meta name="theme-color" content="#09090b">
@@ -118,6 +118,9 @@
 
     html {
       scroll-behavior: smooth;
+      touch-action: pan-x pan-y;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
     }
 
     body {
@@ -128,6 +131,17 @@
       overflow-x: hidden;
       padding-bottom: 96px; /* Espacio para barra flotante de control */
       transition: background 0.3s ease, color 0.3s ease;
+      touch-action: pan-x pan-y;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+
+    /* Bloqueo total de scroll de fondo cuando el panel o modal está abierto */
+    body.drawer-locked {
+      overflow: hidden !important;
+      position: fixed !important;
+      width: 100% !important;
+      touch-action: none !important;
     }
 
     /* =========================================================================
@@ -145,6 +159,13 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+    }
+
+    @media (min-width: 860px) {
+      .topbar {
+        padding-left: calc((100vw - 820px) / 2 + 1.25rem);
+        padding-right: calc((100vw - 820px) / 2 + 1.25rem);
+      }
     }
 
     .topbar-brand {
@@ -1274,6 +1295,8 @@
       opacity: 0;
       visibility: hidden;
       transition: all 0.3s ease;
+      touch-action: none;
+      overscroll-behavior: contain;
     }
 
     .panel-backdrop.active {
@@ -1296,6 +1319,9 @@
       transform: translateY(100%);
       transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease;
       box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.35);
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
     }
 
     @media (min-width: 840px) {
@@ -1369,6 +1395,9 @@
     .drawer-body {
       padding: 1.25rem;
       overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
       display: flex;
       flex-direction: column;
       gap: 1.25rem;
@@ -1743,6 +1772,8 @@
       opacity: 0;
       visibility: hidden;
       transition: all 0.25s ease;
+      touch-action: none;
+      overscroll-behavior: contain;
     }
 
     .modal-backdrop.active {
@@ -1761,6 +1792,8 @@
       position: relative;
       transform: scale(0.95);
       transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      touch-action: pan-y;
+      overscroll-behavior: contain;
     }
 
     .modal-backdrop.active .modal-card {
@@ -2700,16 +2733,37 @@
     }
 
     // =========================================================================
-    // GESTIÓN DEL DRAWER
+    // GESTIÓN DEL DRAWER (CON BLOQUEO Y AISLAMIENTO DE SCROLL DEL FONDO)
     // =========================================================================
+    let pageScrollPosition = 0;
+    let isBodyScrollLocked = false;
+
+    function lockBackgroundScroll() {
+      if (isBodyScrollLocked) return;
+      pageScrollPosition = window.pageYOffset || document.documentElement.scrollTop || 0;
+      document.body.classList.add('drawer-locked');
+      document.body.style.top = `-${pageScrollPosition}px`;
+      isBodyScrollLocked = true;
+    }
+
+    function unlockBackgroundScroll() {
+      if (!isBodyScrollLocked) return;
+      document.body.classList.remove('drawer-locked');
+      document.body.style.top = '';
+      window.scrollTo(0, pageScrollPosition);
+      isBodyScrollLocked = false;
+    }
+
     function openControlDrawer() {
       document.getElementById('panelBackdrop').classList.add('active');
       document.getElementById('controlDrawer').classList.add('active');
+      lockBackgroundScroll();
     }
 
     function closeControlDrawer() {
       document.getElementById('panelBackdrop').classList.remove('active');
       document.getElementById('controlDrawer').classList.remove('active');
+      unlockBackgroundScroll();
     }
 
     // =========================================================================
@@ -2936,6 +2990,7 @@
       }
 
       backdrop.classList.add('active');
+      lockBackgroundScroll();
     }
 
     function closeProductModal(e) {
@@ -2945,6 +3000,7 @@
       const backdrop = document.getElementById('productModalBackdrop');
       const videoEl = document.getElementById('modalVideo');
       backdrop.classList.remove('active');
+      unlockBackgroundScroll();
       if (videoEl) {
         videoEl.pause();
         videoEl.removeAttribute('src');
@@ -2960,7 +3016,60 @@
       preloadProductsMedia();
       renderMenu();
       cardVideoController = initCardVideoFocus();
+
+      // Bloquear arrastre y scroll del fondo al tocar el backdrop
+      const panelBackdrop = document.getElementById('panelBackdrop');
+      if (panelBackdrop) {
+        panelBackdrop.addEventListener('touchmove', (e) => {
+          if (e.cancelable) e.preventDefault();
+        }, { passive: false });
+      }
+
+      const prodBackdrop = document.getElementById('productModalBackdrop');
+      if (prodBackdrop) {
+        prodBackdrop.addEventListener('touchmove', (e) => {
+          if (e.target === prodBackdrop && e.cancelable) e.preventDefault();
+        }, { passive: false });
+      }
+
+      // Aislamiento de scroll dentro del drawer para que nunca se filtre al fondo
+      const drawerBody = document.querySelector('.drawer-body');
+      if (drawerBody) {
+        let drawerLastTouchY = 0;
+        drawerBody.addEventListener('touchstart', (e) => {
+          if (e.touches.length === 1) drawerLastTouchY = e.touches[0].clientY;
+        }, { passive: true });
+
+        drawerBody.addEventListener('touchmove', (e) => {
+          const currentY = e.touches[0].clientY;
+          const dy = currentY - drawerLastTouchY;
+          const atTop = drawerBody.scrollTop <= 0 && dy > 0;
+          const atBottom = drawerBody.scrollTop + drawerBody.clientHeight >= drawerBody.scrollHeight - 1 && dy < 0;
+          if (atTop || atBottom) {
+            if (e.cancelable) e.preventDefault();
+          }
+          drawerLastTouchY = currentY;
+        }, { passive: false });
+      }
     });
+
+    // Prevenir zoom-out y gestos de pellizco accidentales en Mac trackpad y pantallas táctiles
+    window.addEventListener('wheel', (e) => {
+      if (e.ctrlKey) e.preventDefault();
+    }, { passive: false });
+
+    document.addEventListener('gesturestart', (e) => e.preventDefault());
+    document.addEventListener('gesturechange', (e) => e.preventDefault());
+    document.addEventListener('gestureend', (e) => e.preventDefault());
+
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', (e) => {
+      const now = Date.now();
+      if (now - lastTouchEnd <= 300) {
+        e.preventDefault();
+      }
+      lastTouchEnd = now;
+    }, false);
 
     // Tecla Escape cierra modal o drawer
     document.addEventListener('keydown', (e) => {

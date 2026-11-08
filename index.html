@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Kori Films — Plataforma de Cartas Digitales</title>
   <meta name="description" content="Plataforma de cartas digitales y menús QR interactivos de alta calidad visual.">
   <meta name="theme-color" content="#07080b">
@@ -29,6 +29,12 @@
       padding: 0;
     }
 
+    html {
+      touch-action: pan-x pan-y;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+
     body {
       background-color: var(--bg-dark);
       color: #f1f5f9;
@@ -39,6 +45,9 @@
       justify-content: space-between;
       overflow-x: hidden;
       position: relative;
+      touch-action: pan-x pan-y;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
     }
 
     /* Iluminación ambiental cinematográfica */
@@ -400,6 +409,26 @@
   <footer class="landing-footer">
     <p>© 2026 Kori Films • <a href="control/">Panel de Control</a></p>
   </footer>
+
+  <script>
+    // Prevenir zoom-out y gestos de pellizco accidentales en Mac trackpad y pantallas táctiles
+    window.addEventListener('wheel', (e) => {
+      if (e.ctrlKey) e.preventDefault();
+    }, { passive: false });
+
+    document.addEventListener('gesturestart', (e) => e.preventDefault());
+    document.addEventListener('gesturechange', (e) => e.preventDefault());
+    document.addEventListener('gestureend', (e) => e.preventDefault());
+
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', (e) => {
+      const now = Date.now();
+      if (now - lastTouchEnd <= 300) {
+        e.preventDefault();
+      }
+      lastTouchEnd = now;
+    }, false);
+  </script>
 
 </body>
 </html>

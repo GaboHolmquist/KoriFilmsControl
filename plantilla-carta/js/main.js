@@ -1179,4 +1179,22 @@ function initPullToRefresh() {
   window.addEventListener('touchcancel', endTouch, { passive: true });
 }
 
+// Prevenir zoom-out y gestos de pellizco accidentales en Mac trackpad y pantallas táctiles
+window.addEventListener('wheel', (e) => {
+  if (e.ctrlKey) e.preventDefault();
+}, { passive: false });
+
+document.addEventListener('gesturestart', (e) => e.preventDefault());
+document.addEventListener('gesturechange', (e) => e.preventDefault());
+document.addEventListener('gestureend', (e) => e.preventDefault());
+
+let lastTouchEndTemplate = 0;
+document.addEventListener('touchend', (e) => {
+  const now = Date.now();
+  if (now - lastTouchEndTemplate <= 300) {
+    e.preventDefault();
+  }
+  lastTouchEndTemplate = now;
+}, false);
+
 init();
